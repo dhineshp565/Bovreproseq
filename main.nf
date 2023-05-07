@@ -75,12 +75,13 @@ process splitbam {
 	val(sample),emit:sample
 	path("${sample}_mappedreads.txt"),emit:mapped
 	path("${sample}_*.bam"),emit:bam
-
+	path("${sample}_consensus.fasta"),emit:consensus
 	shell:
 	"""
 	samtools index ${sample_path} > ${sample}.bai
 	samtools idxstats ${sample_path}|awk '{if (\$3!=0) print \$1}' > ${sample}_mappedreads.txt
-	while read lines;do amp=\$(echo \$lines|cut -f1 -d' ');samtools view -b ${sample_path} "\${amp}" > ${sample}_\${amp}.bam;done < "${sample}_mappedreads.txt"
+	while read lines;do amp=\$(echo \$lines|cut -f1 -d' ');samtools view -b ${sample_path} "\${amp}" > ${sample}_\${amp}.bam;samtools consensus -f fasta ${sample}_\${amp}.bam > ${sample}_\${amp}.fasta;sed -i "s/>.*/>${sample}_\${amp}_consensus/" ${sample}_\${amp}.fasta;done < "${sample}_mappedreads.txt"
+	cat ${sample}_*.fasta > ${sample}_consensus.fasta
 	"""
 }
 //split fasta for mapped reads only using seqtk
@@ -136,6 +137,7 @@ process bedtools {
 	val(sample)
 	path(txtfile)
 	path(sample_path)
+	path(fasta)
 	output:
 	val(sample)
 	path ("${sample}*.bedgraph")
@@ -163,6 +165,8 @@ process igvreports {
 	--output ${sample}.html 
 	"""
 }
+
+
 
 workflow {
 	data=Channel
