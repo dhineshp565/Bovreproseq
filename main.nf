@@ -7,6 +7,7 @@ nextflow.enable.dsl=2
 params.input='./samplelist.csv'
 params.outdir='Results'
 params.reference='reference.fasta'
+params.primerbed='primer.bed'
 
 process checksamplelist {
 	
@@ -56,11 +57,11 @@ process samtools {
 	output:
 	val(sample),emit:sample
 	path ("${reference}.fai")
-	path ("${sample}_sorted.bam"),emit:bam
+	path ("${sample}.bam"),emit:bam
 	path ("${reference}.bed"),emit:bed
 	script:
 	"""
-	samtools view -b ${sample_path}|samtools sort > ${sample}_sorted.bam
+	samtools view -b ${sample_path}|samtools sort > ${sample}.bam
 	samtools faidx ${reference}
 	awk 'BEGIN {FS="\t"}; {print \$1 FS "0" FS \$2}' "${reference}.fai" > ${reference}.bed  
 	"""
@@ -71,6 +72,7 @@ process splitbam {
 	input:
 	val(sample)
 	path(sample_path)
+	path (primerbed)
 	output:
 	val(sample),emit:sample
 	path("${sample}_mappedreads.txt"),emit:mapped
@@ -78,9 +80,11 @@ process splitbam {
 	path("${sample}_consensus.fasta"),emit:consensus
 	shell:
 	"""
-	samtools index ${sample_path} > ${sample}.bai
-	samtools idxstats ${sample_path}|awk '{if (\$3!=0) print \$1}' > ${sample}_mappedreads.txt
-	while read lines;do amp=\$(echo \$lines|cut -f1 -d' ');samtools view -b ${sample_path} "\${amp}" > ${sample}_\${amp}.bam;samtools consensus -f fasta ${sample}_\${amp}.bam > ${sample}_\${amp}.fasta;sed -i "s/>.*/>${sample}_\${amp}_consensus/" ${sample}_\${amp}.fasta;done < "${sample}_mappedreads.txt"
+	samtools ampliconclip -b ${primerbed} ${sample_path} > ${sample}_trimmed.bam
+	samtools sort "${sample}_trimmed.bam" > ${sample}_tr_sorted.bam
+	samtools index "${sample}_tr_sorted.bam" > ${sample}_sorted.bai
+	samtools idxstats "${sample}_tr_sorted.bam"|awk '{if (\$3!=0) print \$1}' > ${sample}_mappedreads.txt
+	while read lines;do amp=\$(echo \$lines|cut -f1 -d' ');samtools view -b "${sample}_tr_sorted.bam" "\${amp}" > ${sample}_\${amp}.bam;samtools consensus -f fasta ${sample}_\${amp}.bam > ${sample}_\${amp}.fasta;sed -i "s/>.*/>${sample}_\${amp}_consensus/" ${sample}_\${amp}.fasta;done < "${sample}_mappedreads.txt"
 	cat ${sample}_*.fasta > ${sample}_consensus.fasta
 	"""
 }
@@ -173,14 +177,15 @@ workflow {
 	.fromPath(params.input)
 	.splitCsv(header:true)
         .map { row-> tuple(row.sample,row.sample_path) }
-	reference=file(params.reference)	
+	reference=file(params.reference)
+	primerbed=file(params.primerbed)	
         merge_fastq(data)
 	|view()
 	porechop(merge_fastq.out)
 	|view ()
 	minimap2(reference,porechop.out)
 	samtools(reference,minimap2.out)
-	splitbam(samtools.out.sample,samtools.out.bam)
+	splitbam(samtools.out.sample,samtools.out.bam,primerbed)
 	bedtools(splitbam.out)
 	mapped_ref(splitbam.out.sample,splitbam.out.mapped,reference)
 	mapped_ref_bed(mapped_ref.out)
