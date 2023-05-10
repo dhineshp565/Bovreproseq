@@ -83,8 +83,14 @@ process splitbam {
 	samtools ampliconclip -b ${primerbed} ${sample_path} > ${sample}_trimmed.bam
 	samtools sort "${sample}_trimmed.bam" > ${sample}_tr_sorted.bam
 	samtools index "${sample}_tr_sorted.bam" > ${sample}_sorted.bai
-	samtools idxstats "${sample}_tr_sorted.bam"|awk '{if (\$3!=0) print \$1}' > ${sample}_mappedreads.txt
-	while read lines;do amp=\$(echo \$lines|cut -f1 -d' ');samtools view -b "${sample}_tr_sorted.bam" "\${amp}" > ${sample}_\${amp}.bam;samtools consensus -f fasta ${sample}_\${amp}.bam > ${sample}_\${amp}.fasta;sed -i "s/>.*/>${sample}_\${amp}_consensus/" ${sample}_\${amp}.fasta;done < "${sample}_mappedreads.txt"
+	samtools idxstats "${sample}_tr_sorted.bam"|awk '{if (\$3!=0) print \$1,\$3}' > ${sample}_mappedreads.txt
+	while read lines
+	do 
+		amp=\$(echo \$lines|cut -f1 -d' ')
+		samtools view -b "${sample}_tr_sorted.bam" "\${amp}" > ${sample}_\${amp}.bam
+		samtools consensus -f fasta ${sample}_\${amp}.bam > ${sample}_\${amp}.fasta
+		sed -i "s/>.*/>${sample}_\${amp}_consensus/" ${sample}_\${amp}.fasta
+	done < "${sample}_mappedreads.txt"
 	cat ${sample}_*.fasta > ${sample}_consensus.fasta
 	"""
 }
@@ -99,9 +105,11 @@ process mapped_ref {
 	output:
 	val(sample),emit:sample
 	path("${sample}_mapped_ref.fasta"),emit:fasta
+	path("${txtfile}_nameonly.txt"),emit:nameonly
 	script:
 	"""
-	seqtk subseq ${reference} ${txtfile} > ${sample}_mapped_ref.fasta
+	cat ${txtfile}|cut -f 1 -d' ' > ${txtfile}_nameonly.txt
+	seqtk subseq ${reference} "${txtfile}_nameonly.txt" > ${sample}_mapped_ref.fasta
 	"""
 }
 //Generate fai and bed from mapped reference
@@ -139,9 +147,8 @@ process bedtools {
 	publishDir "${params.outdir}/bedtools/"
 	input:
 	val(sample)
-	path(txtfile)
 	path(sample_path)
-	path(fasta)
+	path(txtfile)
 	output:
 	val(sample)
 	path ("${sample}*.bedgraph")
@@ -186,8 +193,8 @@ workflow {
 	minimap2(reference,porechop.out)
 	samtools(reference,minimap2.out)
 	splitbam(samtools.out.sample,samtools.out.bam,primerbed)
-	bedtools(splitbam.out)
 	mapped_ref(splitbam.out.sample,splitbam.out.mapped,reference)
-	mapped_ref_bed(mapped_ref.out)
+	mapped_ref_bed(mapped_ref.out.sample,mapped_ref.out.fasta)
+	bedtools(splitbam.out.sample,splitbam.out.bam,mapped_ref.out.nameonly)
 	igvreports(mapped_ref.out.fasta,mapped_ref_bed.out,bedtools.out)
 }
