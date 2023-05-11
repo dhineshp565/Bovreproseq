@@ -80,10 +80,11 @@ process splitbam {
 	path("${sample}_consensus.fasta"),emit:consensus
 	shell:
 	"""
-	samtools ampliconclip -b ${primerbed} ${sample_path} > ${sample}_trimmed.bam
+	samtools ampliconclip --both-ends -b ${primerbed} ${sample_path} > ${sample}_trimmed.bam
 	samtools sort "${sample}_trimmed.bam" > ${sample}_tr_sorted.bam
 	samtools index "${sample}_tr_sorted.bam" > ${sample}_sorted.bai
-	samtools idxstats "${sample}_tr_sorted.bam"|awk '{if (\$3!=0) print \$1,\$3}' > ${sample}_mappedreads.txt
+	samtools idxstats "${sample}_tr_sorted.bam" > ${sample}_idxstats.txt
+	awk '{if (\$3!=0) print \$1,\$3}' "${sample}_idxstats.txt" > ${sample}_mappedreads.txt
 	while read lines
 	do 
 		amp=\$(echo \$lines|cut -f1 -d' ')
