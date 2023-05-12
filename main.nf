@@ -9,19 +9,8 @@ params.outdir='Results'
 params.reference='reference.fasta'
 params.primerbed='primer.bed'
 
-process checksamplelist {
-	
-	input:
-	tuple val(sample),val(sample_path)
-	output:
-	stdout
-	
-	"""
-	echo 'this $sample is in  $sample_path'
 
-	"""
-}
-//merge fastq files for each sample
+//merge fastq files for each sample and create a merged file for each samples
 process merge_fastq {
 	publishDir "${params.outdir}/merged"
 	input:
@@ -48,7 +37,21 @@ process porechop {
 	porechop -i $sample_path -o ${sample}_trimmed.fastq
 	"""
 }
-//getting index from reference
+// sequence alignment
+process minimap2 {
+        publishDir "${params.outdir}/minimap2/"
+        input:
+        path (reference)
+        tuple val(sample),path(sample_path)
+        output:
+        tuple val(sample),path ("${sample}.sam")
+        script:
+        """
+        minimap2 -ax map-ont $reference $sample_path > ${sample}.sam
+        """
+}
+
+//convert minimap2 output sam to sorted bam, create reference index and bed file from the given reference input
 process samtools {
 	publishDir "${params.outdir}/samtools"
 	input:
@@ -66,7 +69,7 @@ process samtools {
 	awk 'BEGIN {FS="\t"}; {print \$1 FS "0" FS \$2}' "${reference}.fai" > ${reference}.bed  
 	"""
 }
-//splitbam
+//splitbam - trims the primers on both ends of the mapped reads,splits bam file based on mapped reads,creates index and idxstats,creates consensus, ouputs a txtfile with seqname and no. of mapped reads
 process splitbam {
 	publishDir "${params.outdir}/splitbam"
 	input:
@@ -113,7 +116,7 @@ process mapped_ref {
 	seqtk subseq ${reference} "${txtfile}_nameonly.txt" > ${sample}_mapped_ref.fasta
 	"""
 }
-//Generate fai and bed from mapped reference
+//Generate fasta index (fai) and bed from fasta file created in mapped ref
 process mapped_ref_bed {
 	publishDir "${params.outdir}/mapped_ref_bed"	
 	input:
@@ -128,21 +131,6 @@ process mapped_ref_bed {
 	"""
 }
 
-		
-
-// sequence alignment
-process minimap2 {
-	publishDir "${params.outdir}/minimap2/"
-	input:
-	path (reference)	
-	tuple val(sample),path(sample_path)
-	output:
-        tuple val(sample),path ("${sample}.sam")
-	script:
-	"""
-	minimap2 -ax map-ont $reference $sample_path > ${sample}.sam
-	"""
-}
 // generating bedgraph files from alignments
 process bedtools {
 	publishDir "${params.outdir}/bedtools/"
@@ -188,9 +176,7 @@ workflow {
 	reference=file(params.reference)
 	primerbed=file(params.primerbed)	
         merge_fastq(data)
-	|view()
 	porechop(merge_fastq.out)
-	|view ()
 	minimap2(reference,porechop.out)
 	samtools(reference,minimap2.out)
 	splitbam(samtools.out.sample,samtools.out.bam,primerbed)
