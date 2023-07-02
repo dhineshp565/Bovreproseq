@@ -73,6 +73,7 @@ process samtools {
 	"""
 }
 //splitbam - trims the primers on both ends of the mapped reads,splits bam file based on mapped reads,creates index and idxstats,creates consensus, ouputs a txtfile with seqname and no. of mapped reads
+//samtools view -h -e 'length(seq)>=600' ${sample}_\${amp}.bam|samtools sort
 process splitbam {
 	publishDir "${params.outdir}/splitbam"
 	input:
@@ -83,9 +84,10 @@ process splitbam {
 	val(sample),emit:sample
 	path("${sample}_mappedreads.txt"),emit:mapped
 	path("${sample}_idxstats.txt"),emit:idxstats
+	path("${sample}_*_*_idxstats.txt"),emit:full_idxstats
 	path("${sample}_*.bam"),emit:bam
 	path("${sample}_consensus.fasta"),emit:consensus
-	shell:
+	script:
 	"""
 #trims primers from both ends of the ampliocn using primer bed file
 	samtools ampliconclip --both-ends -b ${primerbed} ${sample_path} > ${sample}_trimmed.bam
@@ -94,13 +96,17 @@ process splitbam {
 #index sorted bam file and generate read counts for each amplicon
 	samtools index "${sample}_tr_sorted.bam" > ${sample}_sorted.bai
 	samtools idxstats "${sample}_tr_sorted.bam" > ${sample}_idxstats.txt
-	awk '{if (\$3!=0) print \$1,\$3}' "${sample}_idxstats.txt" > ${sample}_mappedreads.txt
+	awk '{if (\$3!=0) print \$1,\$2,\$3}' "${sample}_idxstats.txt" > ${sample}_mappedreads.txt
 #using the list of mapped amplicons from text file, bam file is split based on amplicons and consensus is generated for each mapped amplicons
 	while read lines
 	do 
 		amp=\$(echo \$lines|cut -f1 -d' ')
+		len=\$(echo \$lines|cut -f2 -d' ')
 		samtools view -b "${sample}_tr_sorted.bam" "\${amp}" > ${sample}_\${amp}.bam
-		samtools consensus -f fasta ${sample}_\${amp}.bam > ${sample}_\${amp}.fasta
+	        samtools view -h "${sample}_\${amp}.bam"|awk -v l=\${len} '/^@/|| length(\$10)>=l-50 && length(\$10)<=l+50'|samtools sort > ${sample}_\${len}_\${amp}.bam
+		samtools index "${sample}_\${len}_\${amp}.bam" > ${sample}_\${len}_\${amp}.bai
+		samtools idxstats "${sample}_\${len}_\${amp}.bam" > ${sample}_\${len}_\${amp}_idxstats.txt
+		samtools consensus -f fasta "${sample}_\${len}_\${amp}.bam" > ${sample}_\${amp}.fasta
 		sed -i "s/>.*/>${sample}_\${amp}_consensus/" ${sample}_\${amp}.fasta
 	done < "${sample}_mappedreads.txt"
 	cat ${sample}_*.fasta > ${sample}_consensus.fasta
@@ -191,23 +197,49 @@ process multiqc {
 	"""
 }
 
+//kraken2 for classification
+process kraken2 {
+	publishDir "${params.outdir}/kraken/"
+
+	input:
+	tuple val(sample),path (merged_fastq)
+	path(db_path)
+	path (consensus)
+	
+	output:
+	path ("${sample}_consensus_kraken.csv")
+	path ("${sample}_consensus_aggregates.csv")
+	path ("${sample}_total_kraken.csv")
+	path ("${sample}_total_aggregates.csv")
+
+	script:
+	"""
+	kraken2 --db $db_path $merged_fastq --output ${sample}_total_kraken.csv --threads 1 --report ${sample}_total_aggregates.csv
+	"""
+}
+
+
 workflow {
 	data=Channel
 	.fromPath(params.input)
 	.splitCsv(header:true)
         .map { row-> tuple(row.sample,row.sample_path) }
 	reference=file(params.reference)
-	primerbed=file(params.primerbed)	
+	primerbed=file(params.primerbed)
+	db=file(params.db)	
         merge_fastq(data)
+//trim barcodes and adapter sequences
 	porechop(merge_fastq.out)
+//map raw reads to reference
 	minimap2(reference,porechop.out)
 	samtools(reference,minimap2.out)
 	splitbam(samtools.out.sample,samtools.out.bam,primerbed)
 	stats=samtools.out.stats
 	idxstats=splitbam.out.idxstats
 	multiqc(stats.mix(idxstats).collect())
-	mapped_ref(splitbam.out.sample,splitbam.out.mapped,reference)
-	mapped_ref_bed(mapped_ref.out.sample,mapped_ref.out.fasta)
+//	kraken2(porechop.out,db,splitbam.out.consensus)
+//	mapped_ref(splitbam.out.sample,splitbam.out.mapped,reference)
+//	mapped_ref_bed(mapped_ref.out.sample,mapped_ref.out.fasta)
 //	bedtools(splitbam.out.sample,splitbam.out.bam,mapped_ref.out.nameonly)
 //	igvreports(mapped_ref.out.fasta,mapped_ref_bed.out,bedtools.out)
 }
