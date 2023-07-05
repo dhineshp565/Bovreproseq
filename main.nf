@@ -8,7 +8,7 @@ params.input='./samplelist.csv'
 params.outdir='Results'
 params.reference='reference.fasta'
 params.primerbed='primer.bed'
-
+params.trim_barcodes=null
 
 //merge fastq files for each sample and create a merged file for each samples
 process merge_fastq {
@@ -223,6 +223,7 @@ process kraken2 {
 	script:
 	"""
 	kraken2 --db $db_path $merged_fastq --output ${sample}_total_kraken.csv --threads 1 --report ${sample}_total_aggregates.csv
+	kraken2 --db $db_path $consenus --output ${sample}_consensus_kraken.csv --threads 1 --report ${sample}_consensus_kraken_report.csv
 	"""
 }
 
@@ -237,9 +238,15 @@ workflow {
 //	db=file(params.db)	
         merge_fastq(data)
 //trim barcodes and adapter sequences
-	porechop(merge_fastq.out)
+	if (params.trim_barcodes){
+		porechop(merge_fastq.out)
+	} 
 //map raw reads to reference
-	minimap2(reference,porechop.out)
+	if (params.trim_barcodes){
+		minimap2(reference,porechop.out)
+	} else {
+		minimap2(reference,merge_fastq.out)
+	}
 	samtools(reference,minimap2.out)
 	splitbam(samtools.out.sample,samtools.out.bam,primerbed)
 	stats=samtools.out.stats
