@@ -1,0 +1,42 @@
+Collecting package metadata (current_repodata.json): ...working... done
+Solving environment: ...working... done
+
+## Package Plan ##
+
+  environment location: /data/Dhinesh/Bovreproseq/work/conda/env-ce11b5d37ab322f874baf1c13845527f
+
+  added / updated specs:
+    - samtools
+
+
+The following NEW packages will be INSTALLED:
+
+  _libgcc_mutex      conda-forge/linux-64::_libgcc_mutex-0.1-conda_forge 
+  _openmp_mutex      conda-forge/linux-64::_openmp_mutex-4.5-2_gnu 
+  bzip2              pkgs/main/linux-64::bzip2-1.0.8-h7b6447c_0 
+  c-ares             conda-forge/linux-64::c-ares-1.19.1-hd590300_0 
+  ca-certificates    pkgs/main/linux-64::ca-certificates-2023.05.30-h06a4308_0 
+  htslib             bioconda/linux-64::htslib-1.17-h81da01d_2 
+  krb5               pkgs/main/linux-64::krb5-1.20.1-h143b758_1 
+  libcurl            conda-forge/linux-64::libcurl-8.1.2-h409715c_0 
+  libdeflate         conda-forge/linux-64::libdeflate-1.18-h0b41bf4_0 
+  libedit            pkgs/main/linux-64::libedit-3.1.20221030-h5eee18b_0 
+  libev              pkgs/main/linux-64::libev-4.33-h7f8727e_1 
+  libgcc-ng          conda-forge/linux-64::libgcc-ng-13.1.0-he5830b7_0 
+  libgomp            conda-forge/linux-64::libgomp-13.1.0-he5830b7_0 
+  libnghttp2         pkgs/main/linux-64::libnghttp2-1.52.0-h2d74bed_1 
+  libssh2            conda-forge/linux-64::libssh2-1.11.0-h0841786_0 
+  libstdcxx-ng       conda-forge/linux-64::libstdcxx-ng-13.1.0-hfd8a6a1_0 
+  libzlib            conda-forge/linux-64::libzlib-1.2.13-hd590300_5 
+  lz4-c              pkgs/main/linux-64::lz4-c-1.9.4-h6a678d5_0 
+  ncurses            pkgs/main/linux-64::ncurses-6.4-h6a678d5_0 
+  openssl            conda-forge/linux-64::openssl-3.1.1-hd590300_1 
+  samtools           bioconda/linux-64::samtools-1.17-hd87286a_1 
+  xz                 pkgs/main/linux-64::xz-5.4.2-h5eee18b_0 
+  zlib               conda-forge/linux-64::zlib-1.2.13-hd590300_5 
+  zstd               pkgs/main/linux-64::zstd-1.5.5-hc292b87_0 
+
+
+Preparing transaction: ...working... done
+Verifying transaction: ...working... done
+Executing transaction: ...working... done

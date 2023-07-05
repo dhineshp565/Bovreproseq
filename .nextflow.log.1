@@ -1,0 +1,131 @@
+Jul-05 13:41:26.543 [main] DEBUG nextflow.cli.Launcher - $> nextflow main.nf --input samplelist.csv --reference /data/Dhinesh/Bovreproseq/Bovreproseq_ref_multi.fasta --outdir testrun_merge --primerbed /data/Dhinesh/Bovreproseq/Bovreproseq_primer.bed -profile conda
+Jul-05 13:41:26.594 [main] INFO  nextflow.cli.CmdRun - N E X T F L O W  ~  version 22.12.0-edge
+Jul-05 13:41:26.607 [main] DEBUG nextflow.plugin.PluginsFacade - Setting up plugin manager > mode=prod; embedded=false; plugins-dir=/usr/lib/ont-nextflow/plugins; core-plugins: nf-amazon@1.13.0,nf-azure@0.15.0,nf-codecommit@0.1.2,nf-console@1.0.4,nf-ga4gh@1.0.4,nf-google@1.5.0,nf-tower@1.5.8,nf-wave@0.6.3
+Jul-05 13:41:26.613 [main] INFO  org.pf4j.DefaultPluginStatusProvider - Enabled plugins: []
+Jul-05 13:41:26.614 [main] INFO  org.pf4j.DefaultPluginStatusProvider - Disabled plugins: []
+Jul-05 13:41:26.616 [main] INFO  org.pf4j.DefaultPluginManager - PF4J version 3.4.1 in 'deployment' mode
+Jul-05 13:41:26.622 [main] INFO  org.pf4j.AbstractPluginManager - No plugins
+Jul-05 13:41:26.662 [main] DEBUG nextflow.cli.CmdRun - Applied DSL=2 from script declararion
+Jul-05 13:41:26.666 [main] INFO  nextflow.cli.CmdRun - Launching `main.nf` [curious_brown] DSL2 - revision: 36d002599c
+Jul-05 13:41:26.667 [main] DEBUG nextflow.plugin.PluginsFacade - Plugins default=[]
+Jul-05 13:41:26.667 [main] DEBUG nextflow.plugin.PluginsFacade - Plugins resolved requirement=[]
+Jul-05 13:41:26.676 [main] DEBUG nextflow.secret.LocalSecretsProvider - Secrets store: /usr/lib/ont-nextflow/secrets/store.json
+Jul-05 13:41:26.680 [main] DEBUG nextflow.secret.SecretsLoader - Discovered secrets providers: [nextflow.secret.LocalSecretsProvider@10ef5fa0] - activable => nextflow.secret.LocalSecretsProvider@10ef5fa0
+Jul-05 13:41:26.736 [main] DEBUG nextflow.Session - Session UUID: 2d793cdc-8cf5-470a-a68a-cda75f7815c8
+Jul-05 13:41:26.737 [main] DEBUG nextflow.Session - Run name: curious_brown
+Jul-05 13:41:26.737 [main] DEBUG nextflow.Session - Executor pool size: 16
+Jul-05 13:41:26.750 [main] DEBUG nextflow.util.ThreadPoolBuilder - Creating thread pool 'FileTransfer' minSize=10; maxSize=48; workQueue=LinkedBlockingQueue[10000]; allowCoreThreadTimeout=false
+Jul-05 13:41:26.769 [main] DEBUG nextflow.cli.CmdRun - 
+  Version: 22.12.0-edge build 5831
+  Created: 13-12-2022 21:57 UTC (15:57 CDT)
+  System: Linux 5.15.0-76-generic
+  Runtime: Groovy 3.0.13 on OpenJDK 64-Bit Server VM 11.0.19+7-post-Ubuntu-0ubuntu120.04.1
+  Encoding: UTF-8 (UTF-8)
+  Process: 564435@GXB03119 [127.0.0.1]
+  CPUs: 16 - Mem: 62.7 GB (42.5 GB) - Swap: 38.2 GB (34.1 GB)
+Jul-05 13:41:26.782 [main] DEBUG nextflow.Session - Work-dir: /data/Dhinesh/Bovreproseq/work [ext2/ext3]
+Jul-05 13:41:26.782 [main] DEBUG nextflow.Session - Script base path does not exist or is not a directory: /data/Dhinesh/Bovreproseq/bin
+Jul-05 13:41:26.801 [main] DEBUG nextflow.executor.ExecutorFactory - Extension executors providers=[GoogleLifeSciencesExecutor, AwsBatchExecutor, GoogleBatchExecutor]
+Jul-05 13:41:26.810 [main] DEBUG nextflow.Session - Observer factory: DefaultObserverFactory
+Jul-05 13:41:26.811 [main] DEBUG nextflow.Session - Observer factory: TowerFactory
+Jul-05 13:41:26.825 [main] DEBUG nextflow.cache.CacheFactory - Using Nextflow cache factory: nextflow.cache.DefaultCacheFactory
+Jul-05 13:41:26.832 [main] DEBUG nextflow.util.CustomThreadPool - Creating default thread pool > poolSize: 17; maxThreads: 1000
+Jul-05 13:41:26.864 [main] DEBUG nextflow.Session - Session start
+Jul-05 13:41:27.526 [main] DEBUG nextflow.script.ScriptRunner - > Launching execution
+Jul-05 13:41:27.633 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: null
+Jul-05 13:41:27.633 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Jul-05 13:41:27.636 [main] DEBUG nextflow.executor.Executor - [warm up] executor > local
+Jul-05 13:41:27.639 [main] DEBUG n.processor.LocalPollingMonitor - Creating local task monitor for executor 'local' > cpus=16; memory=62.7 GB; capacity=16; pollInterval=100ms; dumpInterval=5m
+Jul-05 13:41:27.694 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: null
+Jul-05 13:41:27.694 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Jul-05 13:41:27.698 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: null
+Jul-05 13:41:27.698 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Jul-05 13:41:27.704 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: null
+Jul-05 13:41:27.704 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Jul-05 13:41:27.709 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: null
+Jul-05 13:41:27.709 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Jul-05 13:41:27.719 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: null
+Jul-05 13:41:27.719 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Jul-05 13:41:27.721 [main] DEBUG nextflow.Session - Workflow process names [dsl2]: mapped_ref_bed, minimap2, kraken2, porechop, samtools, igvreports, merge_fastq, bedtools, multiqc, splitbam, mapped_ref
+Jul-05 13:41:27.722 [main] DEBUG nextflow.Session - Igniting dataflow network (7)
+Jul-05 13:41:27.725 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > merge_fastq
+Jul-05 13:41:27.725 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > porechop
+Jul-05 13:41:27.726 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > minimap2
+Jul-05 13:41:27.726 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > samtools
+Jul-05 13:41:27.726 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > splitbam
+Jul-05 13:41:27.726 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > multiqc
+Jul-05 13:41:27.727 [main] DEBUG nextflow.script.ScriptRunner - > Awaiting termination 
+Jul-05 13:41:27.727 [main] DEBUG nextflow.Session - Session await
+Jul-05 13:41:27.845 [Task submitter] DEBUG n.executor.local.LocalTaskHandler - Launch cmd line: /bin/bash -ue .command.run
+Jul-05 13:41:27.847 [Task submitter] INFO  nextflow.Session - [a5/da7366] Submitted process > merge_fastq (1)
+Jul-05 13:41:27.851 [Task submitter] DEBUG n.executor.local.LocalTaskHandler - Launch cmd line: /bin/bash -ue .command.run
+Jul-05 13:41:27.851 [Task submitter] INFO  nextflow.Session - [75/cf9f70] Submitted process > merge_fastq (2)
+Jul-05 13:41:27.882 [Task monitor] DEBUG n.processor.TaskPollingMonitor - Task completed > TaskHandler[id: 1; name: merge_fastq (1); status: COMPLETED; exit: 0; error: -; workDir: /data/Dhinesh/Bovreproseq/work/a5/da7366672ecda3d9a03561930c0df0]
+Jul-05 13:41:27.899 [Task submitter] DEBUG n.executor.local.LocalTaskHandler - Launch cmd line: /bin/bash -ue .command.run
+Jul-05 13:41:27.899 [Task submitter] INFO  nextflow.Session - [62/6510ea] Submitted process > porechop (1)
+Jul-05 13:41:27.924 [Task monitor] DEBUG n.processor.TaskPollingMonitor - Task completed > TaskHandler[id: 3; name: porechop (1); status: COMPLETED; exit: 127; error: -; workDir: /data/Dhinesh/Bovreproseq/work/62/6510eac641a7601f1b680f100514b9]
+Jul-05 13:41:27.927 [Task monitor] DEBUG nextflow.processor.TaskProcessor - Handling unexpected condition for
+  task: name=porechop (1); work-dir=/data/Dhinesh/Bovreproseq/work/62/6510eac641a7601f1b680f100514b9
+  error [nextflow.exception.ProcessFailedException]: Process `porechop (1)` terminated with an error exit status (127)
+Jul-05 13:41:27.933 [Task monitor] ERROR nextflow.processor.TaskProcessor - Error executing process > 'porechop (1)'
+
+Caused by:
+  Process `porechop (1)` terminated with an error exit status (127)
+
+Command executed:
+
+  porechop -i NTC.fastq.gz -o NTC_trimmed.fastq
+
+Command exit status:
+  127
+
+Command output:
+  (empty)
+
+Command error:
+  .command.sh: line 2: porechop: command not found
+
+Work dir:
+  /data/Dhinesh/Bovreproseq/work/62/6510eac641a7601f1b680f100514b9
+
+Tip: when you have fixed the problem you can continue the execution adding the option `-resume` to the run command line
+Jul-05 13:41:27.937 [Task monitor] DEBUG nextflow.Session - Session aborted -- Cause: Process `porechop (1)` terminated with an error exit status (127)
+Jul-05 13:41:27.948 [Task monitor] DEBUG nextflow.Session - The following nodes are still active:
+[process] porechop
+  status=ACTIVE
+  port 0: (queue) OPEN  ; channel: -
+  port 1: (cntrl) -     ; channel: $
+
+[process] minimap2
+  status=ACTIVE
+  port 0: (value) bound ; channel: reference
+  port 1: (queue) OPEN  ; channel: -
+  port 2: (cntrl) -     ; channel: $
+
+[process] samtools
+  status=ACTIVE
+  port 0: (value) bound ; channel: reference
+  port 1: (queue) OPEN  ; channel: -
+  port 2: (cntrl) -     ; channel: $
+
+[process] splitbam
+  status=ACTIVE
+  port 0: (queue) OPEN  ; channel: sample
+  port 1: (queue) OPEN  ; channel: sample_path
+  port 2: (value) bound ; channel: primerbed
+  port 3: (cntrl) -     ; channel: $
+
+[process] multiqc
+  status=ACTIVE
+  port 0: (value) OPEN  ; channel: *
+  port 1: (cntrl) -     ; channel: $
+
+Jul-05 13:41:27.949 [main] DEBUG nextflow.Session - Session await > all processes finished
+Jul-05 13:41:27.949 [main] DEBUG nextflow.Session - Session await > all barriers passed
+Jul-05 13:41:27.953 [main] WARN  n.processor.TaskPollingMonitor - Killing running tasks (1)
+Jul-05 13:41:27.957 [main] DEBUG n.executor.local.LocalTaskHandler - Unable to kill merge_fastq (2) -- command: kill -TERM 564580; exit: 1 
+ bash: line 0: kill: (564580) - No such process
+
+Jul-05 13:41:27.958 [main] DEBUG nextflow.trace.WorkflowStatsObserver - Workflow completed > WorkflowStats[succeededCount=1; failedCount=1; ignoredCount=0; cachedCount=0; pendingCount=0; submittedCount=0; runningCount=0; retriesCount=0; abortedCount=1; succeedDuration=1ms; failedDuration=16ms; cachedDuration=0ms;loadCpus=0; loadMemory=0; peakRunning=2; peakCpus=2; peakMemory=0; ]
+Jul-05 13:41:28.141 [main] DEBUG nextflow.cache.CacheDB - Closing CacheDB done
+Jul-05 13:41:28.153 [main] DEBUG nextflow.script.ScriptRunner - > Execution complete -- Goodbye

@@ -1,0 +1,119 @@
+Jul-05 13:44:06.901 [main] DEBUG nextflow.cli.Launcher - $> nextflow main.nf --input samplelist.csv --reference /data/Dhinesh/Bovreproseq/Bovreproseq_ref_multi.fasta --outdir testrun_merge --primerbed /data/Dhinesh/Bovreproseq/Bovreproseq_primer.bed -profile conda
+Jul-05 13:44:06.953 [main] INFO  nextflow.cli.CmdRun - N E X T F L O W  ~  version 22.10.4
+Jul-05 13:44:06.964 [main] DEBUG nextflow.plugin.PluginsFacade - Setting up plugin manager > mode=prod; embedded=false; plugins-dir=/home/grid/.nextflow/plugins; core-plugins: nf-amazon@1.11.2,nf-azure@0.14.2,nf-codecommit@0.1.2,nf-console@1.0.4,nf-ga4gh@1.0.4,nf-google@1.4.5,nf-tower@1.5.6,nf-wave@0.5.2
+Jul-05 13:44:06.969 [main] INFO  org.pf4j.DefaultPluginStatusProvider - Enabled plugins: []
+Jul-05 13:44:06.970 [main] INFO  org.pf4j.DefaultPluginStatusProvider - Disabled plugins: []
+Jul-05 13:44:06.972 [main] INFO  org.pf4j.DefaultPluginManager - PF4J version 3.4.1 in 'deployment' mode
+Jul-05 13:44:06.977 [main] INFO  org.pf4j.AbstractPluginManager - No plugins
+Jul-05 13:44:06.986 [main] DEBUG nextflow.config.ConfigBuilder - Found config local: /data/Dhinesh/Bovreproseq/nextflow.config
+Jul-05 13:44:06.986 [main] DEBUG nextflow.config.ConfigBuilder - Parsing config file: /data/Dhinesh/Bovreproseq/nextflow.config
+Jul-05 13:44:06.999 [main] DEBUG nextflow.config.ConfigBuilder - Applying config profile: `conda`
+Jul-05 13:44:07.357 [main] DEBUG nextflow.config.ConfigBuilder - Available config profiles: [conda]
+Jul-05 13:44:07.374 [main] DEBUG nextflow.cli.CmdRun - Applied DSL=2 from script declararion
+Jul-05 13:44:07.385 [main] INFO  nextflow.cli.CmdRun - Launching `main.nf` [chaotic_morse] DSL2 - revision: 36d002599c
+Jul-05 13:44:07.385 [main] DEBUG nextflow.plugin.PluginsFacade - Plugins default=[]
+Jul-05 13:44:07.385 [main] DEBUG nextflow.plugin.PluginsFacade - Plugins resolved requirement=[]
+Jul-05 13:44:07.390 [main] DEBUG nextflow.secret.LocalSecretsProvider - Secrets store: /home/grid/.nextflow/secrets/store.json
+Jul-05 13:44:07.392 [main] DEBUG nextflow.secret.SecretsLoader - Discovered secrets providers: [nextflow.secret.LocalSecretsProvider@5e5aafc6] - activable => nextflow.secret.LocalSecretsProvider@5e5aafc6
+Jul-05 13:44:07.433 [main] DEBUG nextflow.Session - Session UUID: 8ee24114-afe8-40bc-a6a5-ee604636e65f
+Jul-05 13:44:07.433 [main] DEBUG nextflow.Session - Run name: chaotic_morse
+Jul-05 13:44:07.433 [main] DEBUG nextflow.Session - Executor pool size: 16
+Jul-05 13:44:07.444 [main] DEBUG nextflow.util.ThreadPoolBuilder - Creating thread pool 'FileTransfer' minSize=10; maxSize=48; workQueue=LinkedBlockingQueue[10000]; allowCoreThreadTimeout=false
+Jul-05 13:44:07.460 [main] DEBUG nextflow.cli.CmdRun - 
+  Version: 22.10.4 build 5836
+  Created: 09-12-2022 09:58 UTC (03:58 CDT)
+  System: Linux 5.15.0-76-generic
+  Runtime: Groovy 3.0.13 on OpenJDK 64-Bit Server VM 11.0.13+7-b1751.21
+  Encoding: UTF-8 (UTF-8)
+  Process: 565183@GXB03119 [127.0.0.1]
+  CPUs: 16 - Mem: 62.7 GB (42.3 GB) - Swap: 38.2 GB (34.1 GB)
+Jul-05 13:44:07.472 [main] DEBUG nextflow.Session - Work-dir: /data/Dhinesh/Bovreproseq/work [ext2/ext3]
+Jul-05 13:44:07.472 [main] DEBUG nextflow.Session - Script base path does not exist or is not a directory: /data/Dhinesh/Bovreproseq/bin
+Jul-05 13:44:07.478 [main] DEBUG nextflow.executor.ExecutorFactory - Extension executors providers=[]
+Jul-05 13:44:07.484 [main] DEBUG nextflow.Session - Observer factory: DefaultObserverFactory
+Jul-05 13:44:07.497 [main] DEBUG nextflow.cache.CacheFactory - Using Nextflow cache factory: nextflow.cache.DefaultCacheFactory
+Jul-05 13:44:07.503 [main] DEBUG nextflow.util.CustomThreadPool - Creating default thread pool > poolSize: 17; maxThreads: 1000
+Jul-05 13:44:07.541 [main] DEBUG nextflow.Session - Session start
+Jul-05 13:44:07.935 [main] DEBUG nextflow.script.ScriptRunner - > Launching execution
+Jul-05 13:44:08.047 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: null
+Jul-05 13:44:08.047 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Jul-05 13:44:08.050 [main] DEBUG nextflow.executor.Executor - [warm up] executor > local
+Jul-05 13:44:08.053 [main] DEBUG n.processor.LocalPollingMonitor - Creating local task monitor for executor 'local' > cpus=16; memory=62.7 GB; capacity=16; pollInterval=100ms; dumpInterval=5m
+Jul-05 13:44:08.094 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withName:porechop` matches process porechop
+Jul-05 13:44:08.095 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: null
+Jul-05 13:44:08.095 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Jul-05 13:44:08.097 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withName:minimap2` matches process minimap2
+Jul-05 13:44:08.098 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: null
+Jul-05 13:44:08.098 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Jul-05 13:44:08.102 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withName:samtools` matches process samtools
+Jul-05 13:44:08.103 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: null
+Jul-05 13:44:08.103 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Jul-05 13:44:08.106 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withName:splitbam` matches process splitbam
+Jul-05 13:44:08.107 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: null
+Jul-05 13:44:08.107 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Jul-05 13:44:08.115 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withName:multiqc` matches process multiqc
+Jul-05 13:44:08.115 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: null
+Jul-05 13:44:08.115 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Jul-05 13:44:08.118 [main] DEBUG nextflow.Session - Workflow process names [dsl2]: mapped_ref_bed, minimap2, kraken2, porechop, samtools, igvreports, merge_fastq, bedtools, multiqc, splitbam, mapped_ref
+Jul-05 13:44:08.118 [main] DEBUG nextflow.Session - Igniting dataflow network (7)
+Jul-05 13:44:08.121 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > merge_fastq
+Jul-05 13:44:08.121 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > porechop
+Jul-05 13:44:08.122 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > minimap2
+Jul-05 13:44:08.122 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > samtools
+Jul-05 13:44:08.122 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > splitbam
+Jul-05 13:44:08.122 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > multiqc
+Jul-05 13:44:08.124 [main] DEBUG nextflow.script.ScriptRunner - > Awaiting termination 
+Jul-05 13:44:08.125 [main] DEBUG nextflow.Session - Session await
+Jul-05 13:44:08.211 [Task submitter] DEBUG n.executor.local.LocalTaskHandler - Launch cmd line: /bin/bash -ue .command.run
+Jul-05 13:44:08.213 [Task submitter] INFO  nextflow.Session - [6f/237554] Submitted process > merge_fastq (1)
+Jul-05 13:44:08.216 [Task submitter] DEBUG n.executor.local.LocalTaskHandler - Launch cmd line: /bin/bash -ue .command.run
+Jul-05 13:44:08.216 [Task submitter] INFO  nextflow.Session - [3f/d977c6] Submitted process > merge_fastq (2)
+Jul-05 13:44:08.246 [Task monitor] DEBUG n.processor.TaskPollingMonitor - Task completed > TaskHandler[id: 1; name: merge_fastq (1); status: COMPLETED; exit: 0; error: -; workDir: /data/Dhinesh/Bovreproseq/work/6f/237554fa160e1bff8c9413d85e0295]
+Jul-05 13:44:08.267 [Actor Thread 15] INFO  nextflow.conda.CondaCache - Creating env using conda: porechop [cache /data/Dhinesh/Bovreproseq/work/conda/env-9e88e1a84444a37b57ac0d9324424ebc]
+Jul-05 13:44:08.285 [Task monitor] DEBUG n.processor.TaskPollingMonitor - Task completed > TaskHandler[id: 2; name: merge_fastq (2); status: COMPLETED; exit: 0; error: -; workDir: /data/Dhinesh/Bovreproseq/work/3f/d977c6aa2bf96a1f1cd1cfaf510f52]
+Jul-05 13:44:33.626 [Actor Thread 15] DEBUG nextflow.conda.CondaCache - 'conda' create complete env=porechop path=/data/Dhinesh/Bovreproseq/work/conda/env-9e88e1a84444a37b57ac0d9324424ebc
+Jul-05 13:44:33.632 [Task submitter] DEBUG n.executor.local.LocalTaskHandler - Launch cmd line: /bin/bash -ue .command.run
+Jul-05 13:44:33.632 [Task submitter] INFO  nextflow.Session - [0f/c21361] Submitted process > porechop (1)
+Jul-05 13:44:33.635 [Task submitter] DEBUG n.executor.local.LocalTaskHandler - Launch cmd line: /bin/bash -ue .command.run
+Jul-05 13:44:33.635 [Task submitter] INFO  nextflow.Session - [c9/150ac4] Submitted process > porechop (2)
+Jul-05 13:45:36.813 [Task monitor] DEBUG n.processor.TaskPollingMonitor - Task completed > TaskHandler[id: 4; name: porechop (2); status: COMPLETED; exit: 0; error: -; workDir: /data/Dhinesh/Bovreproseq/work/c9/150ac46de1737104dc2415469ec825]
+Jul-05 13:45:36.817 [Actor Thread 13] INFO  nextflow.conda.CondaCache - Creating env using conda: minimap2 [cache /data/Dhinesh/Bovreproseq/work/conda/env-acf488aaa1b58da959109fe1fab2cd3a]
+Jul-05 13:45:39.494 [Task monitor] DEBUG n.processor.TaskPollingMonitor - Task completed > TaskHandler[id: 3; name: porechop (1); status: COMPLETED; exit: 0; error: -; workDir: /data/Dhinesh/Bovreproseq/work/0f/c21361b84dd790622f8bf993d10a87]
+Jul-05 13:45:53.109 [Actor Thread 13] DEBUG nextflow.conda.CondaCache - 'conda' create complete env=minimap2 path=/data/Dhinesh/Bovreproseq/work/conda/env-acf488aaa1b58da959109fe1fab2cd3a
+Jul-05 13:45:53.112 [Task submitter] DEBUG n.executor.local.LocalTaskHandler - Launch cmd line: /bin/bash -ue .command.run
+Jul-05 13:45:53.112 [Task submitter] INFO  nextflow.Session - [a1/e3d342] Submitted process > minimap2 (2)
+Jul-05 13:45:53.114 [Task submitter] DEBUG n.executor.local.LocalTaskHandler - Launch cmd line: /bin/bash -ue .command.run
+Jul-05 13:45:53.114 [Task submitter] INFO  nextflow.Session - [37/84c09b] Submitted process > minimap2 (1)
+Jul-05 13:45:56.529 [Task monitor] DEBUG n.processor.TaskPollingMonitor - Task completed > TaskHandler[id: 5; name: minimap2 (1); status: COMPLETED; exit: 0; error: -; workDir: /data/Dhinesh/Bovreproseq/work/37/84c09bf6a8a60aba5dc0df397f9d40]
+Jul-05 13:45:56.532 [Actor Thread 15] INFO  nextflow.conda.CondaCache - Creating env using conda: samtools>=1.17 [cache /data/Dhinesh/Bovreproseq/work/conda/env-ce11b5d37ab322f874baf1c13845527f]
+Jul-05 13:45:57.715 [Task monitor] DEBUG n.processor.TaskPollingMonitor - Task completed > TaskHandler[id: 6; name: minimap2 (2); status: COMPLETED; exit: 0; error: -; workDir: /data/Dhinesh/Bovreproseq/work/a1/e3d342e366dfd20f7e910e50fd0738]
+Jul-05 13:46:14.813 [Actor Thread 15] DEBUG nextflow.conda.CondaCache - 'conda' create complete env=samtools>=1.17 path=/data/Dhinesh/Bovreproseq/work/conda/env-ce11b5d37ab322f874baf1c13845527f
+Jul-05 13:46:14.816 [Task submitter] DEBUG n.executor.local.LocalTaskHandler - Launch cmd line: /bin/bash -ue .command.run
+Jul-05 13:46:14.816 [Task submitter] INFO  nextflow.Session - [cf/ee86f2] Submitted process > samtools (1)
+Jul-05 13:46:14.818 [Task submitter] DEBUG n.executor.local.LocalTaskHandler - Launch cmd line: /bin/bash -ue .command.run
+Jul-05 13:46:14.818 [Task submitter] INFO  nextflow.Session - [f2/6b8511] Submitted process > samtools (2)
+Jul-05 13:46:18.012 [Task monitor] DEBUG n.processor.TaskPollingMonitor - Task completed > TaskHandler[id: 7; name: samtools (1); status: COMPLETED; exit: 0; error: -; workDir: /data/Dhinesh/Bovreproseq/work/cf/ee86f23f1903c36d9e3d149d002293]
+Jul-05 13:46:18.018 [Task submitter] DEBUG n.executor.local.LocalTaskHandler - Launch cmd line: /bin/bash -ue .command.run
+Jul-05 13:46:18.018 [Task submitter] INFO  nextflow.Session - [36/186ae5] Submitted process > splitbam (1)
+Jul-05 13:46:18.679 [Task monitor] DEBUG n.processor.TaskPollingMonitor - Task completed > TaskHandler[id: 8; name: samtools (2); status: COMPLETED; exit: 0; error: -; workDir: /data/Dhinesh/Bovreproseq/work/f2/6b85114c96b0025e78bc2de29d48f7]
+Jul-05 13:46:18.684 [Task submitter] DEBUG n.executor.local.LocalTaskHandler - Launch cmd line: /bin/bash -ue .command.run
+Jul-05 13:46:18.684 [Task submitter] INFO  nextflow.Session - [37/9c6744] Submitted process > splitbam (2)
+Jul-05 13:47:25.703 [Task monitor] DEBUG n.processor.TaskPollingMonitor - Task completed > TaskHandler[id: 9; name: splitbam (1); status: COMPLETED; exit: 0; error: -; workDir: /data/Dhinesh/Bovreproseq/work/36/186ae559137418186ccc6101a7f582]
+Jul-05 13:48:12.161 [Task monitor] DEBUG n.processor.TaskPollingMonitor - Task completed > TaskHandler[id: 10; name: splitbam (2); status: COMPLETED; exit: 0; error: -; workDir: /data/Dhinesh/Bovreproseq/work/37/9c674465beb67e7006f23f1897df80]
+Jul-05 13:48:12.168 [Actor Thread 14] INFO  nextflow.conda.CondaCache - Creating env using conda: multiqc [cache /data/Dhinesh/Bovreproseq/work/conda/env-7bf4c2a892b9442299c8382ab331e09d]
+Jul-05 13:49:08.222 [Task monitor] DEBUG n.processor.TaskPollingMonitor - No more task to compute -- The following nodes are still active:
+[process] multiqc
+  status=ACTIVE
+  port 0: (value) bound ; channel: *
+  port 1: (cntrl) -     ; channel: $
+
+Jul-05 13:49:08.633 [Actor Thread 14] DEBUG nextflow.conda.CondaCache - 'conda' create complete env=multiqc path=/data/Dhinesh/Bovreproseq/work/conda/env-7bf4c2a892b9442299c8382ab331e09d
+Jul-05 13:49:08.636 [Task submitter] DEBUG n.executor.local.LocalTaskHandler - Launch cmd line: /bin/bash -ue .command.run
+Jul-05 13:49:08.636 [Task submitter] INFO  nextflow.Session - [f5/3d83fd] Submitted process > multiqc
+Jul-05 13:49:10.646 [Task monitor] DEBUG n.processor.TaskPollingMonitor - Task completed > TaskHandler[id: 11; name: multiqc; status: COMPLETED; exit: 0; error: -; workDir: /data/Dhinesh/Bovreproseq/work/f5/3d83fdb29c327404fd19f14d6ed00e]
+Jul-05 13:49:10.647 [main] DEBUG nextflow.Session - Session await > all processes finished
+Jul-05 13:49:10.648 [main] DEBUG nextflow.Session - Session await > all barriers passed
+Jul-05 13:49:10.651 [main] DEBUG nextflow.trace.WorkflowStatsObserver - Workflow completed > WorkflowStats[succeededCount=11; failedCount=0; ignoredCount=0; cachedCount=0; pendingCount=0; submittedCount=0; runningCount=0; retriesCount=0; abortedCount=0; succeedDuration=5m 27s; failedDuration=0ms; cachedDuration=0ms;loadCpus=0; loadMemory=0; peakRunning=2; peakCpus=2; peakMemory=0; ]
+Jul-05 13:49:10.700 [main] DEBUG nextflow.cache.CacheDB - Closing CacheDB done
+Jul-05 13:49:10.708 [main] DEBUG nextflow.util.ThreadPoolManager - Thread pool 'FileTransfer' shutdown completed (hard=false)
+Jul-05 13:49:10.708 [main] DEBUG nextflow.script.ScriptRunner - > Execution complete -- Goodbye
