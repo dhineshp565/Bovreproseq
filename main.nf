@@ -16,10 +16,18 @@ process merge_fastq {
 	input:
 	tuple val(sample),path(sample_path)
 	output:
-	tuple val(sample),path("${sample}.fastq")
-	script:
+	tuple val(sample),path("${sample}.{fastq,fastq.gz}")
+	shell:
 	"""
-	cat $sample_path/*.fastq > ${sample}.fastq
+	count=\$(ls -1 $sample_path/*.gz 2>/dev/null | wc -l)
+	
+		if [[ "\${count}" != "0" ]];
+		then
+			cat $sample_path/*.fastq.gz > ${sample}.fastq.gz
+		
+		else
+			cat $sample_path/*.fastq > ${sample}.fastq
+		fi
 	"""
 }
 
@@ -226,7 +234,7 @@ workflow {
         .map { row-> tuple(row.sample,row.sample_path) }
 	reference=file(params.reference)
 	primerbed=file(params.primerbed)
-	db=file(params.db)	
+//	db=file(params.db)	
         merge_fastq(data)
 //trim barcodes and adapter sequences
 	porechop(merge_fastq.out)
@@ -237,7 +245,7 @@ workflow {
 	stats=samtools.out.stats
 	idxstats=splitbam.out.idxstats
 	multiqc(stats.mix(idxstats).collect())
-//	kraken2(porechop.out,db,splitbam.out.consensus)
+//	kraken2(porechop.out,db)
 //	mapped_ref(splitbam.out.sample,splitbam.out.mapped,reference)
 //	mapped_ref_bed(mapped_ref.out.sample,mapped_ref.out.fasta)
 //	bedtools(splitbam.out.sample,splitbam.out.bam,mapped_ref.out.nameonly)
