@@ -13,6 +13,7 @@ params.trim_barcodes=null
 //merge fastq files for each sample and create a merged file for each samples
 process merge_fastq {
 	publishDir "${params.outdir}/merged"
+	label "low"
 	input:
 	tuple val(sample),path(sample_path)
 	output:
@@ -34,8 +35,8 @@ process merge_fastq {
 //trim barcodes and adapter using porechop
 
 process porechop {
-	
-	publishDir "${params.outdir}/trimmed"
+	label "medium"
+	publishDir "${params.outdir}/trimmed",mode:"copy",overwrite: false
 	input:
 	tuple val(sample),path(sample_path)
 	output:
@@ -47,7 +48,8 @@ process porechop {
 }
 // sequence alignment using minimap2
 process minimap2 {
-        publishDir "${params.outdir}/minimap2/"
+        publishDir "${params.outdir}/minimap2/",mode:"copy",overwrite: false
+		label "low"
         input:
         path (reference)
         tuple val(sample),path(sample_path)
@@ -61,7 +63,8 @@ process minimap2 {
 
 //convert minimap2 output sam to sorted bam, create reference index and bed file from the given reference input
 process samtools {
-	publishDir "${params.outdir}/samtools"
+	publishDir "${params.outdir}/samtools",mode:"copy",overwrite: false
+	label "medium"
 	input:
 	path reference
 	tuple val(sample),path(sample_path)
@@ -80,10 +83,10 @@ process samtools {
 	awk 'BEGIN {FS="\t"}; {print \$1 FS "0" FS \$2}' "${reference}.fai" > ${reference}.bed  
 	"""
 }
-//splitbam - trims the primers on both ends of the mapped reads,splits bam file based on mapped reads,creates index and idxstats,creates consensus, ouputs a txtfile with seqname and no. of mapped reads
-//samtools view -h -e 'length(seq)>=600' ${sample}_\${amp}.bam|samtools sort
+//split bam files and create consensus
 process splitbam {
-	publishDir "${params.outdir}/splitbam"
+	publishDir "${params.outdir}/splitbam",mode:"copy",overwrite: false
+	label "medium"
 	input:
 	val(sample)
 	path(sample_path)
@@ -111,7 +114,7 @@ process splitbam {
 		amp=\$(echo \$lines|cut -f1 -d' ')
 		len=\$(echo \$lines|cut -f2 -d' ')
 		samtools view -b "${sample}_tr_sorted.bam" "\${amp}" > ${sample}_\${amp}.bam
-	        samtools view -h "${sample}_\${amp}.bam"|awk -v l=\${len} '/^@/|| length(\$10)>=l-50 && length(\$10)<=l+50'|samtools sort > ${sample}_\${len}_\${amp}.bam
+	    samtools view -h "${sample}_\${amp}.bam"|awk -v l=\${len} '/^@/|| length(\$10)>=l-50 && length(\$10)<=l+50'|samtools sort > ${sample}_\${len}_\${amp}.bam
 		samtools index "${sample}_\${len}_\${amp}.bam" > ${sample}_\${len}_\${amp}.bai
 		samtools idxstats "${sample}_\${len}_\${amp}.bam" > ${sample}_\${len}_\${amp}_idxstats.txt
 		samtools consensus -f fasta "${sample}_\${len}_\${amp}.bam" > ${sample}_\${amp}.fasta
@@ -125,7 +128,7 @@ process splitbam {
 //split fasta for mapped reads only using seqtk
 
 process mapped_ref {
-	publishDir "${params.outdir}/mapped_ref"
+	publishDir "${params.outdir}/mapped_ref",mode:"copy",overwrite: false
 	input:
 	val (sample)
 	path(txtfile)
@@ -142,7 +145,7 @@ process mapped_ref {
 }
 //Generate fasta index (fai) and bed from fasta file created in mapped ref
 process mapped_ref_bed {
-	publishDir "${params.outdir}/mapped_ref_bed"	
+	publishDir "${params.outdir}/mapped_ref_bed",mode:"copy",overwrite: false
 	input:
 	val (sample)
 	path (mapped_fasta)
@@ -157,7 +160,7 @@ process mapped_ref_bed {
 
 // generating bedgraph files from alignments
 process bedtools {
-	publishDir "${params.outdir}/bedtools/"
+	publishDir "${params.outdir}/bedtools/",mode:"copy",overwrite: false
 	input:
 	val(sample)
 	path(sample_path)
@@ -174,7 +177,7 @@ process bedtools {
 
 //igv reports from bedgraph
 process igvreports {
-	publishDir "${params.outdir}/igvreports/"
+	publishDir "${params.outdir}/igvreports/",mode:"copy",overwrite: false
 	input:
 	path(reference)
         path(bed)
@@ -193,7 +196,8 @@ process igvreports {
 //multiqc
 
 process multiqc {
-	publishDir "${params.outdir}/multiqc/"
+	publishDir "${params.outdir}/multiqc/",mode:"copy",overwrite: false
+	label "low"
 	input:
 	path '*'
 	output:
@@ -207,25 +211,27 @@ process multiqc {
 
 //kraken2 for classification
 process kraken2 {
-	publishDir "${params.outdir}/kraken/"
-
+	publishDir "${params.outdir}/kraken2/",mode:"copy",overwrite: false
+	label "hight"
 	input:
-	tuple val(sample),path (merged_fastq)
+	tuple val(sample),path (trimmed_fastq)
 	path(db_path)
 	path (consensus)
 	
 	output:
-	path ("${sample}_consensus_kraken.csv")
-	path ("${sample}_consensus_aggregates.csv")
-	path ("${sample}_total_kraken.csv")
-	path ("${sample}_total_aggregates.csv")
+	path ("${sample}_kraken.csv")
+	path ("${sample}_cons_kraken.csv")
+	path ("${sample}_kraken_report.csv")
+	path ("${sample}_cons_kraken_report.csv")
 
 	script:
 	"""
-	kraken2 --db $db_path $merged_fastq --output ${sample}_total_kraken.csv --threads 1 --report ${sample}_total_aggregates.csv
-	kraken2 --db $db_path $consenus --output ${sample}_consensus_kraken.csv --threads 1 --report ${sample}_consensus_kraken_report.csv
+	kraken2 --db $db_path --output ${sample}_kraken.csv --report ${sample}_kraken_report.csv --threads 1 $trimmed_fastq
+	kraken2 --db $db_path --output ${sample}_cons_kraken.csv --report ${sample}_cons_kraken_report.csv --threads 1 $consensus
 	"""
 }
+
+
 
 
 workflow {
@@ -235,26 +241,34 @@ workflow {
         .map { row-> tuple(row.sample,row.sample_path) }
 	reference=file(params.reference)
 	primerbed=file(params.primerbed)
-//	db=file(params.db)	
+	db=file(params.db)	
         merge_fastq(data)
 //trim barcodes and adapter sequences
 	if (params.trim_barcodes){
 		porechop(merge_fastq.out)
-	} 
-//map raw reads to reference
-	if (params.trim_barcodes){
 		minimap2(reference,porechop.out)
+		 
 	} else {
-		minimap2(reference,merge_fastq.out)
-	}
+                minimap2(reference,merge_fastq.out)
+		
+        }
+/*map raw reads to reference
+//if (params.trim_barcodes){
+//		minimap2(reference,porechop.out)*/
+
+
 	samtools(reference,minimap2.out)
 	splitbam(samtools.out.sample,samtools.out.bam,primerbed)
 	stats=samtools.out.stats
 	idxstats=splitbam.out.idxstats
+	if (params.trim_barcodes){
+              kraken2(porechop.out,db,splitbam.out.consensus)          
+	 } else {
+		kraken2(merge_fastq.out,db,splitbam.out.consensus)
+	}
 	multiqc(stats.mix(idxstats).collect())
-//	kraken2(porechop.out,db)
-//	mapped_ref(splitbam.out.sample,splitbam.out.mapped,reference)
-//	mapped_ref_bed(mapped_ref.out.sample,mapped_ref.out.fasta)
-//	bedtools(splitbam.out.sample,splitbam.out.bam,mapped_ref.out.nameonly)
-//	igvreports(mapped_ref.out.fasta,mapped_ref_bed.out,bedtools.out)
+/*	mapped_ref(splitbam.out.sample,splitbam.out.mapped,reference)
+	mapped_ref_bed(mapped_ref.out.sample,mapped_ref.out.fasta)
+	bedtools(splitbam.out.sample,splitbam.out.bam,mapped_ref.out.nameonly)
+	igvreports(mapped_ref.out.fasta,mapped_ref_bed.out,bedtools.out)*/
 }
