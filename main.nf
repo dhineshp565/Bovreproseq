@@ -9,6 +9,7 @@ params.outdir='Results'
 params.reference='reference.fasta'
 params.primerbed='primer.bed'
 params.trim_barcodes=null
+params.centri='centrifuge_index'
 
 //merge fastq files for each sample and create a merged file for each samples
 process merge_fastq {
@@ -212,7 +213,7 @@ process multiqc {
 //kraken2 for classification
 process kraken2 {
 	publishDir "${params.outdir}/kraken2/",mode:"copy",overwrite: false
-	label "hight"
+	label "high"
 	input:
 	tuple val(sample),path (trimmed_fastq)
 	path(db_path)
@@ -230,6 +231,32 @@ process kraken2 {
 	kraken2 --db $db_path --output ${sample}_cons_kraken.csv --report ${sample}_cons_kraken_report.csv --threads 1 $consensus
 	"""
 }
+//centrifuge for taxonomy classification
+process centrifuge {
+	publishDir "{${params.outdir}/centrifuge/}",mode:"copy",overwrite: false
+	label "medium"
+	input:
+	input:
+	tuple val(sample),path (trimmed_fastq)
+	path(db_path)
+	path (consensus)
+	
+	output:
+	path ("${sample}_cent_report.csv")
+	path ("${sample}_centrifuge_kstyle.csv")
+	path ("${sample}_consensus_kstyle.csv")
+	path("${sample}_centrifuge.csv")
+
+	script:
+	"""
+	index=\$(find -L ${db_path} -name "*.1.cf" -not -name "._*"  | sed 's/.1.cf//')
+	centrifuge -x \${index} -U $trimmed_fastq -q -S ${sample}_centrifuge.csv --report ${sample}_cent_report.csv
+	centrifuge-kreport -x \${index} "${sample}_centrifuge.csv" > ${sample}_centrifuge_kstyle.csv
+	centrifuge -x \${index} -U $consensus -f -S ${sample}_consensus_centrifuge.csv 
+	centrifuge-kreport -x \${index} "${sample}_consensus_centrifuge.csv" > ${sample}_consensus_kstyle.csv
+	"""
+}
+//process krona
 
 
 
@@ -242,7 +269,7 @@ workflow {
 	reference=file(params.reference)
 	primerbed=file(params.primerbed)
 	db=file(params.db)	
-        merge_fastq(data)
+    merge_fastq(data)
 //trim barcodes and adapter sequences
 	if (params.trim_barcodes){
 		porechop(merge_fastq.out)
@@ -261,11 +288,14 @@ workflow {
 	splitbam(samtools.out.sample,samtools.out.bam,primerbed)
 	stats=samtools.out.stats
 	idxstats=splitbam.out.idxstats
-	if (params.trim_barcodes){
+		if (params.trim_barcodes){
               kraken2(porechop.out,db,splitbam.out.consensus)          
+			  centrifuge(porechop.out,params.centri,splitbam.out.consensus)
 	 } else {
 		kraken2(merge_fastq.out,db,splitbam.out.consensus)
+		centrifuge(merge_fastq.out,params.centri,splitbam.out.consensus)
 	}
+	
 	multiqc(stats.mix(idxstats).collect())
 /*	mapped_ref(splitbam.out.sample,splitbam.out.mapped,reference)
 	mapped_ref_bed(mapped_ref.out.sample,mapped_ref.out.fasta)
