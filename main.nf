@@ -222,8 +222,8 @@ process kraken2 {
 	output:
 	path ("${sample}_kraken.csv")
 	path ("${sample}_cons_kraken.csv")
-	path ("${sample}_kraken_report.csv")
-	path ("${sample}_cons_kraken_report.csv")
+	path ("${sample}_kraken_report.csv"),emit:(kraken2_raw)
+	path ("${sample}_cons_kraken_report.csv"),emit:(kraken2_consensus)
 
 	script:
 	"""
@@ -233,9 +233,8 @@ process kraken2 {
 }
 //centrifuge for taxonomy classification
 process centrifuge {
-	publishDir "{${params.outdir}/centrifuge/}",mode:"copy",overwrite: false
+	publishDir "${params.outdir}/centrifuge/",mode:"copy",overwrite: false
 	label "medium"
-	input:
 	input:
 	tuple val(sample),path (trimmed_fastq)
 	path(db_path)
@@ -243,8 +242,8 @@ process centrifuge {
 	
 	output:
 	path ("${sample}_cent_report.csv")
-	path ("${sample}_centrifuge_kstyle.csv")
-	path ("${sample}_consensus_kstyle.csv")
+	path ("${sample}_centrifuge_kstyle.csv"),emit:(centrifuge_raw)
+	path ("${sample}_consensus_kstyle.csv"),emit:(centrifuge_consensus)
 	path("${sample}_centrifuge.csv")
 
 	script:
@@ -256,9 +255,30 @@ process centrifuge {
 	centrifuge-kreport -x \${index} "${sample}_consensus_centrifuge.csv" > ${sample}_consensus_kstyle.csv
 	"""
 }
-//process krona
+//krona plots
+process krona {
+	publishDir "${params.outdir}/krona/",mode:"copy",overwrite: false
+	label "low"
+	errorStrategy 'ignore'
 
-
+	input:
+	path(kraken_raw)
+	path(centrifuge_raw)
+	path(kraken_consensus)
+	path(centrifuge_consensus)
+	output:
+	path ("kraken_raw.html")
+	path ("centrifuge_raw.html")
+	path("kraken_consensus.html")
+	path("centrifuge_consensus.html")
+	script:
+	"""
+	ktImportTaxonomy -t 5 -m 3 -o kraken_raw.html $kraken_raw
+	ktImportTaxonomy -t 5 -m 3 -o centrifuge_raw.html $centrifuge_raw
+	ktImportTaxonomy -t 5 -m 3 -o kraken_consensus.html $kraken_consensus
+	ktImportTaxonomy -t 5 -m 3 -o centrifuge_consensus.html $centrifuge_consensus
+	"""
+}
 
 
 workflow {
@@ -279,11 +299,6 @@ workflow {
                 minimap2(reference,merge_fastq.out)
 		
         }
-/*map raw reads to reference
-//if (params.trim_barcodes){
-//		minimap2(reference,porechop.out)*/
-
-
 	samtools(reference,minimap2.out)
 	splitbam(samtools.out.sample,samtools.out.bam,primerbed)
 	stats=samtools.out.stats
@@ -297,6 +312,13 @@ workflow {
 	}
 	
 	multiqc(stats.mix(idxstats).collect())
+	kraken_raw=kraken2.out.kraken2_raw
+	kraken_cons=kraken2.out.kraken2_consensus
+	centri_raw=centrifuge.out.centrifuge_raw
+	centri_cons=centrifuge.out.centrifuge_consensus
+	krona(kraken_raw.collect(),centri_raw.collect(),kraken_cons.collect(),centri_cons.collect())
+
+
 /*	mapped_ref(splitbam.out.sample,splitbam.out.mapped,reference)
 	mapped_ref_bed(mapped_ref.out.sample,mapped_ref.out.fasta)
 	bedtools(splitbam.out.sample,splitbam.out.bam,mapped_ref.out.nameonly)
