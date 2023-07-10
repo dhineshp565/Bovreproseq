@@ -235,6 +235,7 @@ process kraken2 {
 process centrifuge {
 	publishDir "${params.outdir}/centrifuge/",mode:"copy",overwrite: false
 	label "medium"
+	errorStrategy 'ignore'
 	input:
 	tuple val(sample),path (trimmed_fastq)
 	path(db_path)
