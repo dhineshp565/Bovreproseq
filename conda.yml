@@ -1,7 +1,0 @@
-name:porechop
-channels:
-  - defaults
-  - bioconda
-  - conda-forge
-dependencies:
-  - porechop
