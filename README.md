@@ -6,10 +6,9 @@ Requires input csv file(sample name,samplepath),reference sequence (fasta),prime
 conda or docker needs to be installed.
 
 Usage:
-'''
-nextflow run main.nf --input samplelist.csv --outdir Results_reruns --reference Bovreproseq_ref_multi.fasta --primerbed Bovreproseq_primer.bed --db /data/referenceDB/kraken/minikraken2_v1_8GB/ --centri /data/referenceDB/centrifuge/ -profile docker '''
+```
+nextflow run main.nf --input samplelist.csv --outdir Results_reruns --reference Bovreproseq_ref_multi.fasta --primerbed Bovreproseq_primer.bed --db /data/referenceDB/kraken/minikraken2_v1_8GB/ --centri /data/referenceDB/centrifuge/ -profile docker 
 
-'''
 Options:
 
 --input     csv file with two columns with headers(sample,sample_path).See samplelist.csv
@@ -18,4 +17,5 @@ Options:
 --primerbed Bovreproseq_primer.bed 
 --db        path to kraken database 
 --centri    path to centrifuge database
---profile   conda or docker '''
+--profile   conda or docker
+```
