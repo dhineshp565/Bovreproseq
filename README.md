@@ -7,9 +7,8 @@ conda or docker needs to be installed.
 
 Usage:
 ```
-nextflow run main.nf --input samplelist.csv --outdir Results_reruns --reference Bovreproseq_ref_multi.fasta --primerbed Bovreproseq_primer.bed --db /data/referenceDB/kraken/minikraken2_v1_8GB/ --centri /data/referenceDB/centrifuge/ -profile docker ```
+nextflow run main.nf --input samplelist.csv --outdir Results_reruns --reference test_multi.fasta --primerbed primer.bed --db minikraken2_v1_8GB --centri centrifuge -profile docker 
 
-```
 Options:
 
 --input     csv file with two columns with headers(sample,sample_path).See samplelist.csv
