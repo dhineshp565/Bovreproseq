@@ -10,6 +10,7 @@ params.reference='reference.fasta'
 params.primerbed='primer.bed'
 params.trim_barcodes=null
 params.centri='centrifuge_index'
+params.db='kraken_db'
 
 //merge fastq files for each sample and create a merged file for each samples
 process merge_fastq {
@@ -260,7 +261,7 @@ process centrifuge {
 process krona {
 	publishDir "${params.outdir}/krona/",mode:"copy",overwrite: false
 	label "low"
-	errorStrategy 'ignore'
+	
 
 	input:
 	path(kraken_raw)
