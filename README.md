@@ -18,4 +18,6 @@ Options:
 --db        path to kraken database 
 --centri    path to centrifuge database
 --profile   conda or docker
+optional
+--trim      barcode and adapter trimming using porechop
 ```
