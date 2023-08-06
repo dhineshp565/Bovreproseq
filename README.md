@@ -19,5 +19,5 @@ Options:
 --centri    path to centrifuge database
 --profile   conda or docker
 optional
---trim      barcode and adapter trimming using porechop
+--trim_barcodes barcode and adapter trimming using porechop
 ```
