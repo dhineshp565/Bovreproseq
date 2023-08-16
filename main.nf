@@ -2,9 +2,9 @@
 nextflow.enable.dsl=2
 
 
-//parse input csv file with sample,path to sample fastq
+//parse input csv file with SampleName,path to SampleName fastq
 
-params.input='./samplelist.csv'
+params.input='./SampleNamelist.csv'
 params.outdir='Results'
 params.reference='reference.fasta'
 params.primerbed='primer.bed'
@@ -12,24 +12,26 @@ params.trim_barcodes=null
 params.centri='centrifuge_index'
 params.db='kraken_db'
 
-//merge fastq files for each sample and create a merged file for each samples
+//merge fastq files for each SampleName and create a merged file for each SampleNames
 process merge_fastq {
 	publishDir "${params.outdir}/merged"
 	label "low"
 	input:
-	tuple val(sample),path(sample_path)
+	tuple val(SampleName),path(SamplePath)
 	output:
-	tuple val(sample),path("${sample}.{fastq,fastq.gz}")
+	tuple val(SampleName),path("${SampleName}.{fastq,fastq.gz}")
+	
 	shell:
 	"""
-	count=\$(ls -1 $sample_path/*.gz 2>/dev/null | wc -l)
+	count=\$(ls -1 $SamplePath/*.gz 2>/dev/null | wc -l)
+	
 	
 		if [[ "\${count}" != "0" ]];
 		then
-			cat $sample_path/*.fastq.gz > ${sample}.fastq.gz
+			cat $SamplePath/*.fastq.gz > ${SampleName}.fastq.gz
 		
 		else
-			cat $sample_path/*.fastq > ${sample}.fastq
+			cat $SamplePath/*.fastq > ${SampleName}.fastq
 		fi
 	"""
 }
@@ -40,12 +42,12 @@ process porechop {
 	label "medium"
 	publishDir "${params.outdir}/trimmed",mode:"copy",overwrite: false
 	input:
-	tuple val(sample),path(sample_path)
+	tuple val(SampleName),path(SamplePath)
 	output:
-	tuple val(sample),path ("${sample}_trimmed.fastq")
+	tuple val(SampleName),path ("${SampleName}_trimmed.fastq")
 	script:
 	"""
-	porechop -i $sample_path -o ${sample}_trimmed.fastq
+	porechop -i $SamplePath -o ${SampleName}_trimmed.fastq
 	"""
 }
 // sequence alignment using minimap2
@@ -54,12 +56,12 @@ process minimap2 {
 		label "low"
         input:
         path (reference)
-        tuple val(sample),path(sample_path)
+        tuple val(SampleName),path(SamplePath)
         output:
-        tuple val(sample),path ("${sample}.sam")
+        tuple val(SampleName),path ("${SampleName}.sam")
         script:
         """
-        minimap2 -ax map-ont $reference $sample_path > ${sample}.sam
+        minimap2 -ax map-ont $reference $SamplePath > ${SampleName}.sam
         """
 }
 
@@ -69,18 +71,18 @@ process samtools {
 	label "medium"
 	input:
 	path reference
-	tuple val(sample),path(sample_path)
+	tuple val(SampleName),path(SamplePath)
 	output:
-	val(sample),emit:sample
+	val(SampleName),emit:SampleName
 	path ("${reference}.fai")
-	path ("${sample}.bam"),emit:bam
+	path ("${SampleName}.bam"),emit:bam
 	path ("${reference}.bed"),emit:bed
-	path ("${sample}_stats.txt"),emit:stats
+	path ("${SampleName}_stats.txt"),emit:stats
 	script:
 	"""
 #generate a bam file with primary alignments
-	samtools view -b -F 256 ${sample_path}|samtools sort > ${sample}.bam
-	samtools stats "${sample}.bam" > ${sample}_stats.txt
+	samtools view -b -F 256 ${SamplePath}|samtools sort > ${SampleName}.bam
+	samtools stats "${SampleName}.bam" > ${SampleName}_stats.txt
 	samtools faidx ${reference}
 	awk 'BEGIN {FS="\t"}; {print \$1 FS "0" FS \$2}' "${reference}.fai" > ${reference}.bed  
 	"""
@@ -90,41 +92,41 @@ process splitbam {
 	publishDir "${params.outdir}/splitbam",mode:"copy",overwrite: false
 	label "medium"
 	input:
-	val(sample)
-	path(sample_path)
+	val(SampleName)
+	path(SamplePath)
 	path (primerbed)
 	output:
-	val(sample),emit:sample
-	path("${sample}_mappedreads.txt"),emit:mapped
-	path("${sample}_idxstats.txt"),emit:idxstats
-	path("${sample}_*_*_idxstats.txt"),emit:full_idxstats
-	path("${sample}_*.bam"),emit:bam
-	path("${sample}_consensus.fasta"),emit:consensus
+	val(SampleName),emit:SampleName
+	path("${SampleName}_mappedreads.txt"),emit:mapped
+	path("${SampleName}_idxstats.txt"),emit:idxstats
+	path("${SampleName}_*_*_idxstats.txt"),emit:full_idxstats
+	path("${SampleName}_*.bam"),emit:bam
+	path("${SampleName}_consensus.fasta"),emit:consensus
 	script:
 	"""
 #trims primers from both ends of the ampliocn using primer bed file
-	samtools ampliconclip --both-ends -b ${primerbed} ${sample_path} > ${sample}_trimmed.bam
+	samtools ampliconclip --both-ends -b ${primerbed} ${SamplePath} > ${SampleName}_trimmed.bam
 # sorts the bam file for spitting	
-	samtools sort "${sample}_trimmed.bam" > ${sample}_tr_sorted.bam
+	samtools sort "${SampleName}_trimmed.bam" > ${SampleName}_tr_sorted.bam
 #index sorted bam file and generate read counts for each amplicon
-	samtools index "${sample}_tr_sorted.bam" > ${sample}_sorted.bai
-	samtools idxstats "${sample}_tr_sorted.bam" > ${sample}_idxstats.txt
-	awk '{if (\$3!=0) print \$1,\$2,\$3}' "${sample}_idxstats.txt" > ${sample}_mappedreads.txt
+	samtools index "${SampleName}_tr_sorted.bam" > ${SampleName}_sorted.bai
+	samtools idxstats "${SampleName}_tr_sorted.bam" > ${SampleName}_idxstats.txt
+	awk '{if (\$3!=0) print \$1,\$2,\$3}' "${SampleName}_idxstats.txt" > ${SampleName}_mappedreads.txt
 #using the list of mapped amplicons from text file, bam file is split based on amplicons and consensus is generated for each mapped amplicons
 	while read lines
 	do 
 		amp=\$(echo \$lines|cut -f1 -d' ')
 		len=\$(echo \$lines|cut -f2 -d' ')
-		samtools view -b "${sample}_tr_sorted.bam" "\${amp}" > ${sample}_\${amp}.bam
-	    samtools view -h "${sample}_\${amp}.bam"|awk -v l=\${len} '/^@/|| length(\$10)>=l-50 && length(\$10)<=l+50'|samtools sort > ${sample}_\${len}_\${amp}.bam
-		samtools index "${sample}_\${len}_\${amp}.bam" > ${sample}_\${len}_\${amp}.bai
-		samtools idxstats "${sample}_\${len}_\${amp}.bam" > ${sample}_\${len}_\${amp}_idxstats.txt
-		samtools consensus -f fasta "${sample}_\${len}_\${amp}.bam" > ${sample}_\${amp}.fasta
-		sed -i "s/>.*/>${sample}_\${amp}_consensus/" ${sample}_\${amp}.fasta
-	done < "${sample}_mappedreads.txt"
-	cat ${sample}_*.fasta > ${sample}_consensus.fasta
+		samtools view -b "${SampleName}_tr_sorted.bam" "\${amp}" > ${SampleName}_\${amp}.bam
+	    samtools view -h "${SampleName}_\${amp}.bam"|awk -v l=\${len} '/^@/|| length(\$10)>=l-50 && length(\$10)<=l+50'|samtools sort > ${SampleName}_\${len}_\${amp}.bam
+		samtools index "${SampleName}_\${len}_\${amp}.bam" > ${SampleName}_\${len}_\${amp}.bai
+		samtools idxstats "${SampleName}_\${len}_\${amp}.bam" > ${SampleName}_\${len}_\${amp}_idxstats.txt
+		samtools consensus -f fasta "${SampleName}_\${len}_\${amp}.bam" > ${SampleName}_\${amp}.fasta
+		sed -i "s/>.*/>${SampleName}_\${amp}_consensus/" ${SampleName}_\${amp}.fasta
+	done < "${SampleName}_mappedreads.txt"
+	cat ${SampleName}_*.fasta > ${SampleName}_consensus.fasta
 # insert headers to mappedreads.txt
-	sed -i '1i SampleID ${sample}' "${sample}_mappedreads.txt"
+	sed -i '1i SampleID ${SampleName}' "${SampleName}_mappedreads.txt"
 	"""
 }
 //split fasta for mapped reads only using seqtk
@@ -132,31 +134,31 @@ process splitbam {
 process mapped_ref {
 	publishDir "${params.outdir}/mapped_ref",mode:"copy",overwrite: false
 	input:
-	val (sample)
+	val (SampleName)
 	path(txtfile)
 	path (reference)
 	output:
-	val(sample),emit:sample
-	path("${sample}_mapped_ref.fasta"),emit:fasta
+	val(SampleName),emit:SampleName
+	path("${SampleName}_mapped_ref.fasta"),emit:fasta
 	path("${txtfile}_nameonly.txt"),emit:nameonly
 	script:
 	"""
 	tail -n +2  ${txtfile}|cut -f 1 -d' ' > ${txtfile}_nameonly.txt
-	seqtk subseq ${reference} "${txtfile}_nameonly.txt" > ${sample}_mapped_ref.fasta
+	seqtk subseq ${reference} "${txtfile}_nameonly.txt" > ${SampleName}_mapped_ref.fasta
 	"""
 }
 //Generate fasta index (fai) and bed from fasta file created in mapped ref
 process mapped_ref_bed {
 	publishDir "${params.outdir}/mapped_ref_bed",mode:"copy",overwrite: false
 	input:
-	val (sample)
+	val (SampleName)
 	path (mapped_fasta)
 	output:
-	path ("${sample}_mapped.bed")
+	path ("${SampleName}_mapped.bed")
 	script:
 	"""
 	samtools faidx ${mapped_fasta}
-        awk 'BEGIN {FS="\t"}; {print \$1 FS "0" FS \$2}' "${mapped_fasta}.fai" > ${sample}_mapped.bed
+        awk 'BEGIN {FS="\t"}; {print \$1 FS "0" FS \$2}' "${mapped_fasta}.fai" > ${SampleName}_mapped.bed
 	"""
 }
 
@@ -164,15 +166,15 @@ process mapped_ref_bed {
 process bedtools {
 	publishDir "${params.outdir}/bedtools/",mode:"copy",overwrite: false
 	input:
-	val(sample)
-	path(sample_path)
+	val(SampleName)
+	path(SamplePath)
 	path(txtfile)
 	output:
-	val(sample)
-	path ("${sample}*.bedgraph")
+	val(SampleName)
+	path ("${SampleName}*.bedgraph")
 	script:
 	"""
-	while read lines;do bedtools genomecov -ibam ${sample}_\$lines.bam -bga > ${sample}_\${lines}.bedgraph;done < ${txtfile}
+	while read lines;do bedtools genomecov -ibam ${SampleName}_\$lines.bam -bga > ${SampleName}_\${lines}.bedgraph;done < ${txtfile}
 
 	"""
 }
@@ -183,7 +185,7 @@ process igvreports {
 	input:
 	path(reference)
         path(bed)
-	val(sample)
+	val(SampleName)
 	path(bedgraph)
 	output:
 	path{"*.html"}
@@ -191,7 +193,7 @@ process igvreports {
 	"""
 	create_report $bed $reference\
 	--tracks *.bedgraph\
-	--output ${sample}.html 
+	--output ${SampleName}.html 
 	"""
 }
 
@@ -216,20 +218,20 @@ process kraken2 {
 	publishDir "${params.outdir}/kraken2/",mode:"copy",overwrite: false
 	label "high"
 	input:
-	tuple val(sample),path (trimmed_fastq)
+	tuple val(SampleName),path (trimmed_fastq)
 	path(db_path)
 	path (consensus)
 	
 	output:
-	path ("${sample}_kraken.csv")
-	path ("${sample}_cons_kraken.csv")
-	path ("${sample}_kraken_report.csv"),emit:(kraken2_raw)
-	path ("${sample}_cons_kraken_report.csv"),emit:(kraken2_consensus)
+	path ("${SampleName}_kraken.csv")
+	path ("${SampleName}_cons_kraken.csv")
+	path ("${SampleName}_kraken_report.csv"),emit:(kraken2_raw)
+	path ("${SampleName}_cons_kraken_report.csv"),emit:(kraken2_consensus)
 
 	script:
 	"""
-	kraken2 --db $db_path --output ${sample}_kraken.csv --report ${sample}_kraken_report.csv --threads 1 $trimmed_fastq
-	kraken2 --db $db_path --output ${sample}_cons_kraken.csv --report ${sample}_cons_kraken_report.csv --threads 1 $consensus
+	kraken2 --db $db_path --output ${SampleName}_kraken.csv --report ${SampleName}_kraken_report.csv --threads 1 $trimmed_fastq
+	kraken2 --db $db_path --output ${SampleName}_cons_kraken.csv --report ${SampleName}_cons_kraken_report.csv --threads 1 $consensus
 	"""
 }
 //centrifuge for taxonomy classification
@@ -238,23 +240,23 @@ process centrifuge {
 	label "medium"
 	errorStrategy 'ignore'
 	input:
-	tuple val(sample),path (trimmed_fastq)
+	tuple val(SampleName),path (trimmed_fastq)
 	path(db_path)
 	path (consensus)
 	
 	output:
-	path ("${sample}_cent_report.csv")
-	path ("${sample}_centrifuge_kstyle.csv"),emit:(centrifuge_raw)
-	path ("${sample}_consensus_kstyle.csv"),emit:(centrifuge_consensus)
-	path("${sample}_centrifuge.csv")
+	path ("${SampleName}_cent_report.csv")
+	path ("${SampleName}_centrifuge_kstyle.csv"),emit:(centrifuge_raw)
+	path ("${SampleName}_consensus_kstyle.csv"),emit:(centrifuge_consensus)
+	path("${SampleName}_centrifuge.csv")
 
 	script:
 	"""
 	index=\$(find -L ${db_path} -name "*.1.cf" -not -name "._*"  | sed 's/.1.cf//')
-	centrifuge -x \${index} -U $trimmed_fastq -q -S ${sample}_centrifuge.csv --report ${sample}_cent_report.csv
-	centrifuge-kreport -x \${index} "${sample}_centrifuge.csv" > ${sample}_centrifuge_kstyle.csv
-	centrifuge -x \${index} -U $consensus -f -S ${sample}_consensus_centrifuge.csv 
-	centrifuge-kreport -x \${index} "${sample}_consensus_centrifuge.csv" > ${sample}_consensus_kstyle.csv
+	centrifuge -x \${index} -U $trimmed_fastq -q -S ${SampleName}_centrifuge.csv --report ${SampleName}_cent_report.csv
+	centrifuge-kreport -x \${index} "${SampleName}_centrifuge.csv" > ${SampleName}_centrifuge_kstyle.csv
+	centrifuge -x \${index} -U $consensus -f -S ${SampleName}_consensus_centrifuge.csv 
+	centrifuge-kreport -x \${index} "${SampleName}_consensus_centrifuge.csv" > ${SampleName}_consensus_kstyle.csv
 	"""
 }
 //krona plots
@@ -302,7 +304,7 @@ workflow {
 		
         }
 	samtools(reference,minimap2.out)
-	splitbam(samtools.out.sample,samtools.out.bam,primerbed)
+	splitbam(samtools.out.SampleName,samtools.out.bam,primerbed)
 	stats=samtools.out.stats
 	idxstats=splitbam.out.idxstats
 		if (params.trim_barcodes){
@@ -321,8 +323,8 @@ workflow {
 	krona(kraken_raw.collect(),centri_raw.collect(),kraken_cons.collect(),centri_cons.collect())
 
 
-/*	mapped_ref(splitbam.out.sample,splitbam.out.mapped,reference)
-	mapped_ref_bed(mapped_ref.out.sample,mapped_ref.out.fasta)
-	bedtools(splitbam.out.sample,splitbam.out.bam,mapped_ref.out.nameonly)
+/*	mapped_ref(splitbam.out.SampleName,splitbam.out.mapped,reference)
+	mapped_ref_bed(mapped_ref.out.SampleName,mapped_ref.out.fasta)
+	bedtools(splitbam.out.SampleName,splitbam.out.bam,mapped_ref.out.nameonly)
 	igvreports(mapped_ref.out.fasta,mapped_ref_bed.out,bedtools.out)*/
 }
