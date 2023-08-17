@@ -289,7 +289,7 @@ workflow {
 	data=Channel
 	.fromPath(params.input)
 	.splitCsv(header:true)
-        .map { row-> tuple(row.SampleName,row.SamplePath) }
+    .map { row-> tuple(row.SampleName,row.SamplePath) }
 	reference=file(params.reference)
 	primerbed=file(params.primerbed)
 	db=file(params.db)	
