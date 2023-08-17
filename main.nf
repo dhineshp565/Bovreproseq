@@ -4,7 +4,7 @@ nextflow.enable.dsl=2
 
 //parse input csv file with SampleName,path to SampleName fastq
 
-params.input='./SampleNamelist.csv'
+params.input='./SampleList.csv'
 params.outdir='Results'
 params.reference='reference.fasta'
 params.primerbed='primer.bed'
