@@ -122,7 +122,7 @@ process splitbam {
 	# merge consensus from all amplicons
 	cat ${SampleName}_*.fasta > ${SampleName}_consensus.fasta
 	# insert headers to mappedreads.txt
-	sed -i '1i SampleID Size ${SampleName}' "${SampleName}_mappedreads.txt"
+	sed -i '1i Amplicon_Name Size ${SampleName}' "${SampleName}_mappedreads.txt"
 	"""
 }
 
@@ -179,8 +179,7 @@ process kraken2_consensus {
 //centrifuge for taxonomy classification
 process centrifuge {
 	publishDir "${params.outdir}/centrifuge/",mode:"copy"
-	label "medium"
-	errorStrategy 'ignore'
+	label "high"
 	input:
 	tuple val(SampleName),path (SamplePath)
 	path(db_path)
@@ -199,8 +198,7 @@ process centrifuge {
 }
 process centrifuge_consensus {
 	publishDir "${params.outdir}/centrifuge_cons/",mode:"copy"
-	label "medium"
-	errorStrategy 'ignore'
+	label "high"
 	input:
 	tuple val(SampleName),path (SamplePath)
 	path(db_path)
