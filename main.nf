@@ -1,17 +1,6 @@
 #!/usr/bin/env nextflow
 nextflow.enable.dsl=2
 
-
-//parse input csv file with SampleName,path to SampleName fastq
-
-params.input='./SampleList.csv'
-params.outdir='Results'
-params.reference='reference.fasta'
-params.primerbed='primer.bed'
-params.trim_barcodes=null
-params.centri='centrifuge_index'
-params.db='kraken_db'
-
 //merge fastq files for each SampleName and create a merged file for each SampleNames
 process merge_fastq {
 	publishDir "${params.outdir}/merged"
@@ -23,15 +12,15 @@ process merge_fastq {
 	
 	shell:
 	"""
-	count=\$(ls -1 $SamplePath/*.gz 2>/dev/null | wc -l)
+	count=\$(ls -1 ${SamplePath}/*.gz 2>/dev/null | wc -l)
 	
 	
 		if [[ "\${count}" != "0" ]];
 		then
-			cat $SamplePath/*.fastq.gz > ${SampleName}.fastq.gz
+			cat ${SamplePath}/*.fastq.gz > ${SampleName}.fastq.gz
 		
 		else
-			cat $SamplePath/*.fastq > ${SampleName}.fastq
+			cat ${SamplePath}/*.fastq > ${SampleName}.fastq
 		fi
 	"""
 }
@@ -40,19 +29,19 @@ process merge_fastq {
 
 process porechop {
 	label "medium"
-	publishDir "${params.outdir}/trimmed",mode:"copy",overwrite: false
+	publishDir "${params.outdir}/trimmed"
 	input:
 	tuple val(SampleName),path(SamplePath)
 	output:
 	tuple val(SampleName),path ("${SampleName}_trimmed.fastq")
 	script:
 	"""
-	porechop -i $SamplePath -o ${SampleName}_trimmed.fastq
+	porechop -i ${SamplePath} -o ${SampleName}_trimmed.fastq
 	"""
 }
 // sequence alignment using minimap2
 process minimap2 {
-        publishDir "${params.outdir}/minimap2/",mode:"copy",overwrite: false
+        publishDir "${params.outdir}/minimap2/",mode:"copy"
 		label "low"
         input:
         path (reference)
@@ -61,13 +50,13 @@ process minimap2 {
         tuple val(SampleName),path ("${SampleName}.sam")
         script:
         """
-        minimap2 -ax map-ont $reference $SamplePath > ${SampleName}.sam
+        minimap2 -ax map-ont ${reference} ${SamplePath} > ${SampleName}.sam
         """
 }
 
 //convert minimap2 output sam to sorted bam, create reference index and bed file from the given reference input
 process samtools {
-	publishDir "${params.outdir}/samtools",mode:"copy",overwrite: false
+	publishDir "${params.outdir}/samtools",mode:"copy"
 	label "medium"
 	input:
 	path reference
@@ -80,127 +69,67 @@ process samtools {
 	path ("${SampleName}_stats.txt"),emit:stats
 	script:
 	"""
-#generate a bam file with primary alignments
+	#generate a  sorted bam file with primary alignments
 	samtools view -b -F 256 ${SamplePath}|samtools sort > ${SampleName}.bam
-	samtools stats "${SampleName}.bam" > ${SampleName}_stats.txt
-	samtools faidx ${reference}
-	awk 'BEGIN {FS="\t"}; {print \$1 FS "0" FS \$2}' "${reference}.fai" > ${reference}.bed  
+	samtools stats "${SampleName}.bam" > ${SampleName}_stats.txt  
 	"""
 }
 //split bam files and create consensus
 process splitbam {
-	publishDir "${params.outdir}/splitbam",mode:"copy",overwrite: false
+	publishDir "${params.outdir}/splitbam",mode:"copy"
 	label "medium"
 	input:
-	val(SampleName)
-	path(SamplePath)
+	tuple val(SampleName),path(SamplePath)
 	path (primerbed)
 	output:
 	val(SampleName),emit:SampleName
+	path("${SampleName}_stats.txt"),emit:stats
 	path("${SampleName}_mappedreads.txt"),emit:mapped
 	path("${SampleName}_idxstats.txt"),emit:idxstats
 	path("${SampleName}_*_*_idxstats.txt"),emit:full_idxstats
 	path("${SampleName}_*.bam"),emit:bam
-	path("${SampleName}_consensus.fasta"),emit:consensus
+	tuple val(SampleName),path("${SampleName}_consensus.fasta"),emit:consensus
 	script:
 	"""
+#generate a  sorted bam file with primary alignments
+	samtools view -b -F 256 ${SamplePath}|samtools sort > ${SampleName}.bam	
+	samtools stats "${SampleName}.bam" > ${SampleName}_stats.txt
 #trims primers from both ends of the ampliocn using primer bed file
-	samtools ampliconclip --both-ends -b ${primerbed} ${SamplePath} > ${SampleName}_trimmed.bam
+	samtools ampliconclip --both-ends -b ${primerbed} "${SampleName}.bam"	> ${SampleName}_trimmed.bam
 # sorts the bam file for spitting	
 	samtools sort "${SampleName}_trimmed.bam" > ${SampleName}_tr_sorted.bam
 #index sorted bam file and generate read counts for each amplicon
 	samtools index "${SampleName}_tr_sorted.bam" > ${SampleName}_sorted.bai
 	samtools idxstats "${SampleName}_tr_sorted.bam" > ${SampleName}_idxstats.txt
 	awk '{if (\$3!=0) print \$1,\$2,\$3}' "${SampleName}_idxstats.txt" > ${SampleName}_mappedreads.txt
-#using the list of mapped amplicons from text file, bam file is split based on amplicons and consensus is generated for each mapped amplicons
+#using the list of mapped amplicons from text file, bam file is split based on amplicons and consensus is gen
 	while read lines
 	do 
 		amp=\$(echo \$lines|cut -f1 -d' ')
 		len=\$(echo \$lines|cut -f2 -d' ')
+		# split bam 
 		samtools view -b "${SampleName}_tr_sorted.bam" "\${amp}" > ${SampleName}_\${amp}.bam
+		# Only reads length with + or - 50 bases is used for consenus
 	    samtools view -h "${SampleName}_\${amp}.bam"|awk -v l=\${len} '/^@/|| length(\$10)>=l-50 && length(\$10)<=l+50'|samtools sort > ${SampleName}_\${len}_\${amp}.bam
+		# generate stats for near full length reads
 		samtools index "${SampleName}_\${len}_\${amp}.bam" > ${SampleName}_\${len}_\${amp}.bai
 		samtools idxstats "${SampleName}_\${len}_\${amp}.bam" > ${SampleName}_\${len}_\${amp}_idxstats.txt
+		# generate consensus for full length reads
 		samtools consensus -f fasta "${SampleName}_\${len}_\${amp}.bam" > ${SampleName}_\${amp}.fasta
+		# change fasta header with sample and amplicon names
 		sed -i "s/>.*/>${SampleName}_\${amp}_consensus/" ${SampleName}_\${amp}.fasta
 	done < "${SampleName}_mappedreads.txt"
+	# merge consensus from all amplicons
 	cat ${SampleName}_*.fasta > ${SampleName}_consensus.fasta
-# insert headers to mappedreads.txt
-	sed -i '1i SampleID ${SampleName}' "${SampleName}_mappedreads.txt"
-	"""
-}
-//split fasta for mapped reads only using seqtk
-
-process mapped_ref {
-	publishDir "${params.outdir}/mapped_ref",mode:"copy",overwrite: false
-	input:
-	val (SampleName)
-	path(txtfile)
-	path (reference)
-	output:
-	val(SampleName),emit:SampleName
-	path("${SampleName}_mapped_ref.fasta"),emit:fasta
-	path("${txtfile}_nameonly.txt"),emit:nameonly
-	script:
-	"""
-	tail -n +2  ${txtfile}|cut -f 1 -d' ' > ${txtfile}_nameonly.txt
-	seqtk subseq ${reference} "${txtfile}_nameonly.txt" > ${SampleName}_mapped_ref.fasta
-	"""
-}
-//Generate fasta index (fai) and bed from fasta file created in mapped ref
-process mapped_ref_bed {
-	publishDir "${params.outdir}/mapped_ref_bed",mode:"copy",overwrite: false
-	input:
-	val (SampleName)
-	path (mapped_fasta)
-	output:
-	path ("${SampleName}_mapped.bed")
-	script:
-	"""
-	samtools faidx ${mapped_fasta}
-        awk 'BEGIN {FS="\t"}; {print \$1 FS "0" FS \$2}' "${mapped_fasta}.fai" > ${SampleName}_mapped.bed
-	"""
-}
-
-// generating bedgraph files from alignments
-process bedtools {
-	publishDir "${params.outdir}/bedtools/",mode:"copy",overwrite: false
-	input:
-	val(SampleName)
-	path(SamplePath)
-	path(txtfile)
-	output:
-	val(SampleName)
-	path ("${SampleName}*.bedgraph")
-	script:
-	"""
-	while read lines;do bedtools genomecov -ibam ${SampleName}_\$lines.bam -bga > ${SampleName}_\${lines}.bedgraph;done < ${txtfile}
-
-	"""
-}
-
-//igv reports from bedgraph
-process igvreports {
-	publishDir "${params.outdir}/igvreports/",mode:"copy",overwrite: false
-	input:
-	path(reference)
-        path(bed)
-	val(SampleName)
-	path(bedgraph)
-	output:
-	path{"*.html"}
-	script:
-	"""
-	create_report $bed $reference\
-	--tracks *.bedgraph\
-	--output ${SampleName}.html 
+	# insert headers to mappedreads.txt
+	sed -i '1i SampleID Size ${SampleName}' "${SampleName}_mappedreads.txt"
 	"""
 }
 
 //multiqc
 
 process multiqc {
-	publishDir "${params.outdir}/multiqc/",mode:"copy",overwrite: false
+	publishDir "${params.outdir}/multiqc/",mode:"copy"
 	label "low"
 	input:
 	path '*'
@@ -215,72 +144,110 @@ process multiqc {
 
 //kraken2 for classification
 process kraken2 {
-	publishDir "${params.outdir}/kraken2/",mode:"copy",overwrite: false
+	publishDir "${params.outdir}/kraken2/",mode:"copy"
 	label "high"
 	input:
-	tuple val(SampleName),path (trimmed_fastq)
+	tuple val(SampleName),path (SamplePath)
 	path(db_path)
-	path (consensus)
 	
 	output:
 	path ("${SampleName}_kraken.csv")
-	path ("${SampleName}_cons_kraken.csv")
 	path ("${SampleName}_kraken_report.csv"),emit:(kraken2_raw)
-	path ("${SampleName}_cons_kraken_report.csv"),emit:(kraken2_consensus)
+	
+	script:
+	"""
+	kraken2 --db $db_path --output ${SampleName}_kraken.csv --report ${SampleName}_kraken_report.csv --threads 1 ${SamplePath}
+	"""
+}
+process kraken2_consensus {
+	publishDir "${params.outdir}/kraken2_cons/",mode:"copy"
+	label "high"
+	input:
+	tuple val(SampleName),path (SamplePath)
+	path(db_path)
+	
+	output:
+	path ("${SampleName}_cons_kraken.csv")
+	path ("${SampleName}_cons_kraken_report.csv"),emit:(kraken2_cons)
 
 	script:
 	"""
-	kraken2 --db $db_path --output ${SampleName}_kraken.csv --report ${SampleName}_kraken_report.csv --threads 1 $trimmed_fastq
-	kraken2 --db $db_path --output ${SampleName}_cons_kraken.csv --report ${SampleName}_cons_kraken_report.csv --threads 1 $consensus
+	kraken2 --db $db_path --output ${SampleName}_cons_kraken.csv --report ${SampleName}_cons_kraken_report.csv --threads 1 ${SamplePath}
 	"""
 }
+
 //centrifuge for taxonomy classification
 process centrifuge {
-	publishDir "${params.outdir}/centrifuge/",mode:"copy",overwrite: false
+	publishDir "${params.outdir}/centrifuge/",mode:"copy"
 	label "medium"
 	errorStrategy 'ignore'
 	input:
-	tuple val(SampleName),path (trimmed_fastq)
+	tuple val(SampleName),path (SamplePath)
 	path(db_path)
-	path (consensus)
 	
 	output:
 	path ("${SampleName}_cent_report.csv")
 	path ("${SampleName}_centrifuge_kstyle.csv"),emit:(centrifuge_raw)
-	path ("${SampleName}_consensus_kstyle.csv"),emit:(centrifuge_consensus)
-	path("${SampleName}_centrifuge.csv")
 
 	script:
 	"""
 	index=\$(find -L ${db_path} -name "*.1.cf" -not -name "._*"  | sed 's/.1.cf//')
-	centrifuge -x \${index} -U $trimmed_fastq -q -S ${SampleName}_centrifuge.csv --report ${SampleName}_cent_report.csv
+	centrifuge -x \${index} -U ${SamplePath} -q -S ${SampleName}_centrifuge.csv --report ${SampleName}_cent_report.csv
 	centrifuge-kreport -x \${index} "${SampleName}_centrifuge.csv" > ${SampleName}_centrifuge_kstyle.csv
-	centrifuge -x \${index} -U $consensus -f -S ${SampleName}_consensus_centrifuge.csv 
+	
+	"""
+}
+process centrifuge_consensus {
+	publishDir "${params.outdir}/centrifuge_cons/",mode:"copy"
+	label "medium"
+	errorStrategy 'ignore'
+	input:
+	tuple val(SampleName),path (SamplePath)
+	path(db_path)
+	
+	output:
+	path ("${SampleName}_consensus_centrifuge.csv")
+	path ("${SampleName}_consensus_kstyle.csv"),emit:(centrifuge_cons)
+	
+	script:
+	"""
+	index=\$(find -L ${db_path} -name "*.1.cf" -not -name "._*"  | sed 's/.1.cf//')
+	centrifuge -x \${index} -U ${SamplePath} -f -S ${SampleName}_consensus_centrifuge.csv 
 	centrifuge-kreport -x \${index} "${SampleName}_consensus_centrifuge.csv" > ${SampleName}_consensus_kstyle.csv
 	"""
 }
-//krona plots
-process krona {
-	publishDir "${params.outdir}/krona/",mode:"copy",overwrite: false
-	label "low"
-	
 
+//krona plots
+process krona_kraken {
+	publishDir "${params.outdir}/krona_kraken/",mode:"copy"
+	label "low"
 	input:
-	path(kraken_raw)
-	path(centrifuge_raw)
-	path(kraken_consensus)
-	path(centrifuge_consensus)
+	path(raw)
+	path(consensus)
+	
 	output:
-	path ("kraken_raw.html")
-	path ("centrifuge_raw.html")
-	path("kraken_consensus.html")
-	path("centrifuge_consensus.html")
+	path ("rawreads_classified.html")
+	path("consensus_classified.html")
 	script:
 	"""
-	ktImportTaxonomy -t 5 -m 3 -o kraken_raw.html $kraken_raw
-	ktImportTaxonomy -t 5 -m 3 -o centrifuge_raw.html $centrifuge_raw
-	ktImportTaxonomy -t 5 -m 3 -o kraken_consensus.html $kraken_consensus
-	ktImportTaxonomy -t 5 -m 3 -o centrifuge_consensus.html $centrifuge_consensus
+	ktImportTaxonomy -t 5 -m 3 -o rawreads_classified.html ${raw}
+	ktImportTaxonomy -t 5 -m 3 -o consensus_classified.html ${consensus}
+	"""
+}
+process krona_centrifuge {
+	publishDir "${params.outdir}/krona_centrifuge/",mode:"copy"
+	label "low"
+	input:
+	path(raw)
+	path(consensus)
+	
+	output:
+	path ("rawreads_classified.html")
+	path("consensus_classified.html")
+	script:
+	"""
+	ktImportTaxonomy -t 5 -m 3 -o rawreads_classified.html ${raw}
+	ktImportTaxonomy -t 5 -m 3 -o consensus_classified.html ${consensus}
 	"""
 }
 
@@ -292,7 +259,6 @@ workflow {
     .map { row-> tuple(row.SampleName,row.SamplePath) }
 	reference=file(params.reference)
 	primerbed=file(params.primerbed)
-	db=file(params.db)	
     merge_fastq(data)
 //trim barcodes and adapter sequences
 	if (params.trim_barcodes){
@@ -300,31 +266,51 @@ workflow {
 		minimap2(reference,porechop.out)
 		 
 	} else {
-                minimap2(reference,merge_fastq.out)
+            minimap2(reference,merge_fastq.out)
 		
         }
-	samtools(reference,minimap2.out)
-	splitbam(samtools.out.SampleName,samtools.out.bam,primerbed)
-	stats=samtools.out.stats
-	idxstats=splitbam.out.idxstats
-		if (params.trim_barcodes){
-              kraken2(porechop.out,db,splitbam.out.consensus)          
-			  centrifuge(porechop.out,params.centri,splitbam.out.consensus)
+	// conditional for trim barcodes option
+	if (params.trim_barcodes){
+		if (params.kraken_db) {
+			kraken=params.kraken_db
+			kraken2(porechop.out,kraken)
+		}
+		if (params.centri_db){
+			centri=params.centri_db
+			centrifuge(porechop.out,centri)
+		}           
+			  
 	 } else {
-		kraken2(merge_fastq.out,db,splitbam.out.consensus)
-		centrifuge(merge_fastq.out,params.centri,splitbam.out.consensus)
+		if (params.kraken_db){
+			kraken=params.kraken_db
+			kraken2(merge_fastq.out,kraken)
+		}
+		if (params.centri_db){
+			centri=params.centri_db
+			centrifuge(merge_fastq.out,centri)
+		}
 	}
+	splitbam(minimap2.out,primerbed)
 	
+	//condition for kraken2 classification
+	if (params.kraken_db){
+		kraken=params.kraken_db
+		kraken2_consensus(splitbam.out.consensus,kraken)
+		kraken_raw=kraken2.out.kraken2_raw
+		kraken_cons=kraken2_consensus.out.kraken2_cons
+		krona_kraken(kraken_raw.collect(),kraken_cons.collect())
+		
+	}
+	//condition for centrifuge classification
+	if (params.centri_db){
+		centri=params.centri_db
+		centrifuge_consensus(splitbam.out.consensus,centri)
+		centri_raw=centrifuge.out.centrifuge_raw
+		centri_cons=centrifuge_consensus.out.centrifuge_cons
+		krona_centrifuge(centri_raw.collect(),centri_cons.collect())
+	}
+	stats=splitbam.out.stats
+	idxstats=splitbam.out.idxstats
 	multiqc(stats.mix(idxstats).collect())
-	kraken_raw=kraken2.out.kraken2_raw
-	kraken_cons=kraken2.out.kraken2_consensus
-	centri_raw=centrifuge.out.centrifuge_raw
-	centri_cons=centrifuge.out.centrifuge_consensus
-	krona(kraken_raw.collect(),centri_raw.collect(),kraken_cons.collect(),centri_cons.collect())
 
-
-/*	mapped_ref(splitbam.out.SampleName,splitbam.out.mapped,reference)
-	mapped_ref_bed(mapped_ref.out.SampleName,mapped_ref.out.fasta)
-	bedtools(splitbam.out.SampleName,splitbam.out.bam,mapped_ref.out.nameonly)
-	igvreports(mapped_ref.out.fasta,mapped_ref_bed.out,bedtools.out)*/
 }
