@@ -190,8 +190,8 @@ process centrifuge {
 
 	script:
 	"""
-	index=\$(find -L ${db_path} -name "*.1.cf" -not -name "._*"  | sed 's/.1.cf//')
-	centrifuge -x \${index} -U ${SamplePath} -q -S ${SampleName}_centrifuge.csv --report ${SampleName}_cent_report.csv
+	index=\$(find -L ${db_path} -name "*.2.cf" -not -name "._*"  | sed 's/.2.cf//')
+	centrifuge -x \${index} -U ${SamplePath} -q -S ${SampleName}_centrifuge.csv --report ${SampleName}_cent_report.csv -p 2
 	centrifuge-kreport -x \${index} "${SampleName}_centrifuge.csv" > ${SampleName}_centrifuge_kstyle.csv
 	
 	"""
@@ -209,8 +209,8 @@ process centrifuge_consensus {
 	
 	script:
 	"""
-	index=\$(find -L ${db_path} -name "*.1.cf" -not -name "._*"  | sed 's/.1.cf//')
-	centrifuge -x \${index} -U ${SamplePath} -f -S ${SampleName}_consensus_centrifuge.csv 
+	index=\$(find -L ${db_path} -name "*.2.cf" -not -name "._*"  | sed 's/.2.cf//')
+	centrifuge -x \${index} -U ${SamplePath} -f -S ${SampleName}_consensus_centrifuge.csv -p 2
 	centrifuge-kreport -x \${index} "${SampleName}_consensus_centrifuge.csv" > ${SampleName}_consensus_kstyle.csv
 	"""
 }
@@ -224,8 +224,8 @@ process krona_kraken {
 	path(consensus)
 	
 	output:
-	path ("rawreads_classified.html")
-	path("consensus_classified.html")
+	path ("rawreads_classified.html"),emit:rawreads
+	path("consensus_classified.html"),emit:cons
 	script:
 	"""
 	ktImportTaxonomy -t 5 -m 3 -o rawreads_classified.html ${raw}
@@ -240,8 +240,8 @@ process krona_centrifuge {
 	path(consensus)
 	
 	output:
-	path ("rawreads_classified.html")
-	path("consensus_classified.html")
+	path ("rawreads_classified.html"),emit:rawreads
+	path("consensus_classified.html"),emit:cons
 	script:
 	"""
 	ktImportTaxonomy -t 5 -m 3 -o rawreads_classified.html ${raw}
@@ -249,6 +249,31 @@ process krona_centrifuge {
 	"""
 }
 
+process make_report {
+	publishDir "${params.outdir}/results_report/",mode:"copy"
+	label "low"
+	input:
+	path(krona_reports_raw)
+	path(mappedreads)
+	path(krona_reports_cons)
+	path(rmdfile)
+	output:
+	path("results_report.html")
+	script:
+	"""
+	cp ${krona_reports_raw} rawreads.html
+	cp ${krona_reports_cons} Cons_classified.html
+	mkdir mapped_reads
+	for i in ${mappedreads}
+	do
+		cp ${mappedreads}/*mappedreads.txt mapped_reads
+	done
+	cp ${rmdfile} Bovreproseq_report.Rmd
+
+	rmarkdown::render(input="Bovreproseq_report.Rmd",params=list(dire="mappederads/",krona_raw="rawreads.html",krona_consensus="Cons_classified.html"),output_file = 'Bovreproseq.html')
+	"""
+
+}
 
 workflow {
 	data=Channel
@@ -310,5 +335,12 @@ workflow {
 	stats=splitbam.out.stats
 	idxstats=splitbam.out.idxstats
 	multiqc(stats.mix(idxstats).collect())
+	rmd_file=file("${baseDir}/Bovreproseq_report.Rmd")
+	if (params.kraken_db){
+		make_report(krona_kraken.out.raw,splitbam.out.mapped.collect(),krona_kraken.out.cons,rmd_file)
+	}
+	if (params.centri_db){
+		make_report(krona_centrifuge.out.raw,splitbam.out.mapped.collect(),krona_centrifuge.out.cons,rmd_file)
+	}
 
 }
