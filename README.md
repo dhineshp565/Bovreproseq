@@ -19,7 +19,7 @@ Options:
 --primerbed  Bovreproseq_primer.bed 
 --kraken_db  path to kraken database 
 --centri_db  path to centrifuge database
---profile   conda or docker
+--profile    conda or docker
 optional
 --trim_barcodes barcode and adapter trimming using porechop
 ```
