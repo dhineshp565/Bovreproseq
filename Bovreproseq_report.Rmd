@@ -1,6 +1,5 @@
 ---
 title: "Bovreproseq Results Report"
-author: "dhp565"
 date: "`r Sys.Date()`"
 output:
   html_document: default
@@ -12,12 +11,11 @@ params:
 ---
 
 ```{r setup, include=FALSE}
-
 library(knitr)
 library(ggplot2)
 ```
 
-
+## No. of mapped reads
 ```{R, results='asis',echo=FALSE,fig.width = 10}
 fi <- list.files(path=params$dire,pattern = "*_mappedreads.txt",full.names = T)
 all_dfs <- lapply(fi, function(i){
@@ -25,29 +23,28 @@ all_dfs <- lapply(fi, function(i){
 for (i in all_dfs){
   u<-i[,c(1,3)]
   print(knitr::kable(u))
+  cat('\n\n<!-- -->\n\n')
   plot=ggplot(u,aes(x = !!rlang::sym(colnames(u)[1]),y = !!rlang::sym(colnames(u)[2])))+geom_bar(stat="identity",fill='darkgreen')+scale_y_log10()
   print(plot+coord_flip())
 }
 ```
 
 ## kraken2 raw reads
+
 ```{r, echo=FALSE}
 library("htmltools")
 htmltools::tags$iframe(
   src = base64enc::dataURI(file=params$krona_raw, mime="text/html; charset=UTF-8"),
-  style="border:30; position:relative; top:0; left:0; right:50; bottom:0; width:70%; height:400px"
+  style="border:10; position:relative; top:0; left:200px; right:; bottom:100px; width:70%; height:600px"
 )
 ```
-## Consensus Sequences
-```{r comment=''}
-cat(readLines(params$cons),sep = '\n')
-```
+
 ## kraken2 consensus
 ```{r, echo=FALSE}
 library("htmltools")
 htmltools::tags$iframe(
   src = base64enc::dataURI(file=params$krona_consensus, mime="text/html; charset=UTF-8"),
-  style="border:30; position:relative; top:0; left:0; right:50; bottom:0; width:70%; height:400px"
+  style="border:10; position:relative; top:0; left:200px; right:; bottom:100px; width:70%; height:600px"
 )
 ```
 

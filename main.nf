@@ -224,7 +224,7 @@ process krona_kraken {
 	path(consensus)
 	
 	output:
-	path ("rawreads_classified.html"),emit:rawreads
+	path ("rawreads_classified.html"),emit:raw
 	path("consensus_classified.html"),emit:cons
 	script:
 	"""
@@ -240,7 +240,7 @@ process krona_centrifuge {
 	path(consensus)
 	
 	output:
-	path ("rawreads_classified.html"),emit:rawreads
+	path ("rawreads_classified.html"),emit:raw
 	path("consensus_classified.html"),emit:cons
 	script:
 	"""
@@ -258,7 +258,7 @@ process make_report {
 	path(krona_reports_cons)
 	path(rmdfile)
 	output:
-	path("results_report.html")
+	path("Bovreproseq_results_report.html")
 	script:
 	"""
 	cp ${krona_reports_raw} rawreads.html
@@ -266,11 +266,12 @@ process make_report {
 	mkdir mapped_reads
 	for i in ${mappedreads}
 	do
-		cp ${mappedreads}/*mappedreads.txt mapped_reads
+		cp \${i} mapped_reads
 	done
-	cp ${rmdfile} Bovreproseq_report.Rmd
+	cp ${rmdfile} report.Rmd
+	
 
-	rmarkdown::render(input="Bovreproseq_report.Rmd",params=list(dire="mappederads/",krona_raw="rawreads.html",krona_consensus="Cons_classified.html"),output_file = 'Bovreproseq.html')
+	Rscript -e 'rmarkdown::render(input="report.Rmd",params=list(dire="mapped_reads/",krona_raw="rawreads.html",krona_consensus="Cons_classified.html"),output_file = "Bovreproseq_results_report.html")'
 	"""
 
 }
