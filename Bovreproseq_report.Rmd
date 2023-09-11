@@ -35,7 +35,7 @@ for (i in all_dfs){
 library("htmltools")
 htmltools::tags$iframe(
   src = base64enc::dataURI(file=params$krona_raw, mime="text/html; charset=UTF-8"),
-  style="border:10; position:relative; top:0; left:200px; right:; bottom:100px; width:70%; height:600px"
+  style="border:10; position:relative; top:0; left:; right::; bottom:; width:100%; height:800px"
 )
 ```
 
@@ -44,7 +44,7 @@ htmltools::tags$iframe(
 library("htmltools")
 htmltools::tags$iframe(
   src = base64enc::dataURI(file=params$krona_consensus, mime="text/html; charset=UTF-8"),
-  style="border:10; position:relative; top:0; left:200px; right:; bottom:100px; width:70%; height:600px"
+  style="border:10; position:relative; top:0; left:; right:; bottom:; width:100%; height:800px"
 )
 ```
 
