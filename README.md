@@ -13,7 +13,7 @@ nextflow run main.nf --input samplelist.csv --outdir Results --reference test_mu
 ```
 Options:
 
---input       csv file with two columns with headers(sample,sample_path).See samplelist.csv
+--input      csv file with two columns with headers(SampleName,SamplePath).See samplelist.csv
 --outdir     Output directory
 --reference  fasta or multi-fasta 
 --primerbed  Bovreproseq_primer.bed 
