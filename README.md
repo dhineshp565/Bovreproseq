@@ -11,15 +11,17 @@ nextflow run main.nf --input samplelist.csv --outdir Results --reference test_mu
 ```
 
 ```
-Options:
+Parameters:
 
 --input      csv file with two columns with headers(SampleName,SamplePath).See samplelist.csv
 --outdir     Output directory
 --reference  fasta or multi-fasta 
---primerbed  Bovreproseq_primer.bed 
+--primerbed  Bovreproseq_primer.bed
+--profile    conda or docker
+Taxonomic classification - one should be chosen
 --kraken_db  path to kraken database 
 --centri_db  path to centrifuge database
---profile    conda or docker
 optional
 --trim_barcodes barcode and adapter trimming using porechop
+
 ```
