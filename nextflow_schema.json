@@ -5,21 +5,6 @@
     "description": "",
     "type": "object",
     "definitions": {
-        "optional_parameters": {
-            "title": "optional parameters",
-            "type": "object",
-            "description": "",
-            "default": "",
-            "properties": {
-                "trim_barcodes": {
-                    "type": "string"
-                },
-                "centri_db": {
-                    "type": "string",
-                    "format": "path"
-                }
-            }
-        },
         "required_parameters": {
             "title": "Required parameters",
             "type": "object",
@@ -67,14 +52,29 @@
                     "help_text": "path to kraken database"
                 }
             }
+        },
+        "optional_parameters": {
+            "title": "optional parameters",
+            "type": "object",
+            "description": "",
+            "default": "",
+            "properties": {
+                "trim_barcodes": {
+                    "type": "string"
+                },
+                "centri_db": {
+                    "type": "string",
+                    "format": "path"
+                }
+            }
         }
     },
     "allOf": [
         {
-            "$ref": "#/definitions/optional_parameters"
+            "$ref": "#/definitions/required_parameters"
         },
         {
-            "$ref": "#/definitions/required_parameters"
+            "$ref": "#/definitions/optional_parameters"
         }
     ]
 }
