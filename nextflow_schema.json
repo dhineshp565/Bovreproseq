@@ -20,7 +20,7 @@
             "properties": {
                 "input": {
                     "type": "string",
-                    "format": "file-path",
+                    "format": "directory-path",
                     "exists": true,
                     "mimetype": "text/csv",
                     "pattern": "^\\S+\\.csv$",
@@ -43,7 +43,7 @@
                 "primerbed": {
                     "type": "string",
                     "default": "primer.bed",
-                    "format": "path",
+                    "format": "file-path",
                     "help_text": "primer bed file with primer co-ordinates"
                 },
                 "kraken_db": {
@@ -64,7 +64,7 @@
                 },
                 "centri_db": {
                     "type": "string",
-                    "format": "path"
+                    "format": "directory-path"
                 }
             }
         }
