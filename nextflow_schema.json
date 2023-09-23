@@ -43,12 +43,14 @@
         "reference": {
             "type": "string",
             "default": "reference.fasta",
-            "format": "file-path"
+            "format": "file-path",
+            "help_text": "reference file in fasta format (fasta/multi-fasta)"
         },
         "primerbed": {
             "type": "string",
             "default": "primer.bed",
-            "format": "path"
+            "format": "path",
+            "help_text": "primer bed file with primer co-ordinates"
         },
         "trim_barcodes": {
             "type": "string"
@@ -59,11 +61,13 @@
         },
         "kraken_db": {
             "type": "string",
-            "format": "path"
+            "format": "path",
+            "help_text": "path to kraken database"
         }
     },
     "required": [
         "reference",
-        "primerbed"
+        "primerbed",
+        "kraken_db"
     ]
 }
