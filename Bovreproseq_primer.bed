@@ -1,11 +1,13 @@
-Aspergillus_fumigatus_26s	1	20	Aspergillus_fumigatus_Af1
-Aspergillus_fumigatus_26s	381	401	Aspergillus_fumigatus_Af2
 Bacillus_licheniformis_adk	1	20	Blich-adk-F
 Bacillus_licheniformis_adk	498	518	Blich-adk-R
 Bacillus_licheniformis_gyrB	1	19	Blich-gyrB-F
 Bacillus_licheniformis_gyrB	594	613	Blich-gyrB-R
 BVDv_PF	1	20	BVDPF1
 BVDv_PF	265	285	BVDPR1
+BVDv_Npro	1	26	NproB31-F
+BVDv_Npro	415	441	NproB32-R
+Chlamydia_Spp_omp2	1	22	Chlamydia-ch1-omp2
+Chlamydia_Spp_omp2	565	587	Chlamydia-h2-omp2
 Chlamydiaabortus-Helicasegene	1	19	Cabortus-Helicasegene-F
 Chlamydiaabortus-Helicasegene	460	479	Cabortus-Helicasegene-R
 CFF_sapB2	1	24	Campylobacterfetusfetus_sapB2-F
@@ -30,20 +32,12 @@ CFV_parA	1	25	CFV-VenSF
 CFV_parA	116	141	CFV-VenSR
 CFV_virB11nC1165g4	1	20	CFV-virB11nC1165g4-F
 CFV_virB11nC1165g4	213	233	CFV-virB11nC1165g4-R
-Chlamydia_Spp_omp2	1	22	Chlamydia-ch1-omp2
-Chlamydia_Spp_omp2	565	587	Chlamydia-h2-omp2
-Cjejuni-23s	1	23	Cjejuni-23s-F
-Cjejuni-23s	627	650	Cjejuni-23s-R
-Cjejuni_HIP400	1	23	Cjejuni-HIP1134-R
-Cjejuni_HIP400	712	735	Cjejuni-HIP400-F
 Coxiella_burnetti_CoxF2	1	19	CoxbF2
 Coxiella_burnetti_CoxF2	670	689	CoxbR4
 Coxiella_burnetti_Trans-1	1	22	CoxbTrans-1-F
 Coxiella_burnetti_Trans-1	664	686	CoxbTrans-2-R
 IC-EGFP	1	20	Egfp-F
 IC-EGFP	530	550	Egfp-R
-Aspergillus_fumigatus_Uni_ITS1	1	19	Fungal_uni_ITS1
-Aspergillus_fumigatus_Uni_ITS1	1	20	Fungal_uni_ITS4
 IBR-gBN	1	20	IBR-gBN-1
 IBR-gBN	365	385	IBR-gBN-2
 IBR-gE	1	20	IBR-gE-1c
@@ -62,21 +56,29 @@ Mycoplasma_bovis_gpsA	1	20	Mplasmabovis-gpsA-F
 Mycoplasma_bovis_gpsA	501	521	Mplasmabovis-gpsA-R
 Neospora_caninum_pNC-5gene	1	19	Neospora_caninumpNC-5geneNp21
 Neospora_caninum_pNC-5gene	309	328	Neospora_caninumpNC-5geneNp6
-BVDv_Npro	1	26	NproB31-F
-BVDv_Npro	415	441	NproB32-R
 Sarcocystis_spp	1	20	Sar-F1
 Sarcocystis_spp	600	620	Sar-F2
-Trueperella_pyogenes_cpn60	1	18	T.pyo-Cpn60-B3
-Trueperella_pyogenes_cpn60	262	280	T.pyo-Cpn60-F3
-Trichomonas__18s	1	19	TF-forward_18S
-Trichomonas__18s	348	367	TF-reverse_5.8S
+Trichomonas_18s	1	19	TF-forward_18S
+Trichomonas_18s	348	367	TF-reverse_5.8S
 Toxoplasma_gondii_P30	1	20	Toxoplasma_gondii_DS38
 Toxoplasma_gondii_P30	500	520	Toxoplasma_gondii_DS39
-TFssrRNA_Tritichomonasfetus_ssRNA	1	26	Tritichomonasfetus_ssRNA_TFR3
-TFssrRNA_Tritichomonasfetus_ssRNA	322	348	Tritichomonasfetus_ssRNA_TFR4
+Tritichomonasfetus_ssRNA	1	26	Tritichomonasfetus_ssRNA_TFR3
+Tritichomonasfetus_ssRNA	322	348	Tritichomonasfetus_ssRNA_TFR4
 Trueperella_pyogenes_493bp_ploN	1	20	Trueperella_pyogenes_493bp_ploNF
 Trueperella_pyogenes_493bp_ploN	473	493	Trueperella_pyogenes_493bp_ploNR
 Ureaplasmadiversum-16sRNA	1	21	Ureaplasmadiversum-16sRNA_UDF
 Ureaplasmadiversum-16sRNA	290	311	Ureaplasmadiversum-16sRNA_UDR
 Ureaplasmaspp_UGP	1	20	Ureaplasmaspp_UGP-F
 Ureaplasmaspp_UGP	622	642	Ureaplasmaspp_UGP-R
+Trueperella_pyogenes_sodA	1	24	Tpyo_sodA-F
+Trueperella_pyogenes_sodA	178	199	Tpyo_sodA_R
+Campylobacterjejuni_cj0414	1	24	cj0414C1F 
+Campylobacterjejuni_cj0414	139	160	cj0414C1R
+Campylobacterjejuni_hipO	1	24	hipO-C.jejuni-F
+Campylobacterjejuni_hipO	319	344	hipO-C.jejuni-F
+Coccidia_Sarcocystishominis	1	23
+Coccidia_Sarcocystishominis	306	330
+Coccidia_Neosporacaninum	1	23
+Coccidia_Neosporacaninum	286	309
+Coccidia_Toxoplasmagondii	1	23	
+Coccidia_Toxoplasmagondii	285	309
