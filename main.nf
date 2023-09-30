@@ -55,25 +55,6 @@ process minimap2 {
 }
 
 //convert minimap2 output sam to sorted bam, create reference index and bed file from the given reference input
-process samtools {
-	publishDir "${params.outdir}/samtools",mode:"copy"
-	label "medium"
-	input:
-	path reference
-	tuple val(SampleName),path(SamplePath)
-	output:
-	val(SampleName),emit:SampleName
-	path ("${reference}.fai")
-	path ("${SampleName}.bam"),emit:bam
-	path ("${reference}.bed"),emit:bed
-	path ("${SampleName}_stats.txt"),emit:stats
-	script:
-	"""
-	#generate a  sorted bam file with primary alignments
-	samtools view -b -F 256 ${SamplePath}|samtools sort > ${SampleName}.bam
-	samtools stats "${SampleName}.bam" > ${SampleName}_stats.txt  
-	"""
-}
 //split bam files and create consensus
 process splitbam {
 	publishDir "${params.outdir}/splitbam",mode:"copy"
@@ -92,7 +73,7 @@ process splitbam {
 	script:
 	"""
 #generate a  sorted bam file with primary alignments
-	samtools view -b -F 256 ${SamplePath}|samtools sort > ${SampleName}.bam	
+	samtools view -b -h -F 256 -q 30 ${SamplePath}|samtools sort > ${SampleName}.bam	
 	samtools stats "${SampleName}.bam" > ${SampleName}_stats.txt
 #trims primers from both ends of the ampliocn using primer bed file
 	samtools ampliconclip --both-ends -b ${primerbed} "${SampleName}.bam"	> ${SampleName}_trimmed.bam
@@ -101,7 +82,7 @@ process splitbam {
 #index sorted bam file and generate read counts for each amplicon
 	samtools index "${SampleName}_tr_sorted.bam" > ${SampleName}_sorted.bai
 	samtools idxstats "${SampleName}_tr_sorted.bam" > ${SampleName}_idxstats.txt
-	awk '{if (\$3!=0) print \$1,\$2,\$3}' "${SampleName}_idxstats.txt" > ${SampleName}_mappedreads.txt
+	awk '{if (\$3 >= 10) print \$1,\$2,\$3}' "${SampleName}_idxstats.txt" > ${SampleName}_mappedreads.txt
 #using the list of mapped amplicons from text file, bam file is split based on amplicons and consensus is gen
 	while read lines
 	do 
