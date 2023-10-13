@@ -2,20 +2,17 @@
     "$schema": "http://json-schema.org/draft-07/schema",
     "$id": "https://raw.githubusercontent.com/Bovreproseq/master/nextflow_schema.json",
     "title": "Bovreproseq pipeline parameters",
-    "description": "",
+    "description": "Pipeline for genarating results from targeted amplicon sequencing",
     "type": "object",
     "definitions": {
-        "required_parameters": {
-            "title": "Required parameters",
+        "input_output_options": {
+            "title": "Input/output options",
             "type": "object",
             "fa_icon": "fas fa-terminal",
-            "description": "Must be provided",
+            "description": "Define where the pipeline should find input data and save output data.",
             "required": [
                 "input",
-                "outdir",
-                "reference",
-                "primerbed",
-                "kraken_db"
+                "outdir"
             ],
             "properties": {
                 "input": {
@@ -23,36 +20,32 @@
                     "format": "file-path",
                     "exists": true,
                     "mimetype": "text/csv",
-                    "description": "Path to comma-separated file containing information about the samples in the experiment.",
+                    "pattern": "^\\S+\\.csv$",
+                    "description": "Input directory conatining fastq _dir",
                     "help_text": "You will need to create a design file with information about the samples in your experiment before running the pipeline. Use this parameter to specify its location. It has to be a comma-separated file with 3 columns, and a header row.",
-                    "fa_icon": "fas fa-file-csv"
+                    "fa_icon": "fas fa-folder-open"
                 },
                 "outdir": {
                     "type": "string",
+                    "format": "directory-path",
                     "description": "The output directory where the results will be saved. You have to use absolute paths to storage on Cloud infrastructure.",
                     "fa_icon": "fas fa-folder-open"
                 },
-                "reference": {
-                    "type": "string",
-                    "default": "reference.fasta",
-                    "format": "file-path",
-                    "help_text": "reference file in fasta format (fasta/multi-fasta)"
-                },
                 "primerbed": {
                     "type": "string",
-                    "default": "primer.bed",
-                    "format": "file-path",
-                    "help_text": "primer bed file with primer co-ordinates"
+                    "default": "primer.bed"
                 },
                 "kraken_db": {
+                    "type": "string"
+                },
+                "reference": {
                     "type": "string",
-                    "format": "path",
-                    "help_text": "path to kraken database"
+                    "default": "reference.fasta"
                 }
             }
         },
-        "optional_parameters": {
-            "title": "optional parameters",
+        "optional": {
+            "title": "Optional",
             "type": "object",
             "description": "",
             "default": "",
@@ -61,18 +54,17 @@
                     "type": "string"
                 },
                 "centri_db": {
-                    "type": "string",
-                    "format": "directory-path"
+                    "type": "string"
                 }
             }
         }
     },
     "allOf": [
         {
-            "$ref": "#/definitions/required_parameters"
+            "$ref": "#/definitions/input_output_options"
         },
         {
-            "$ref": "#/definitions/optional_parameters"
+            "$ref": "#/definitions/optional"
         }
     ]
 }
