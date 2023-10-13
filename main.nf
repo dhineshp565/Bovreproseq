@@ -1,6 +1,24 @@
 #!/usr/bin/env nextflow
 nextflow.enable.dsl=2
 
+process make_csv {
+	publishDir "${params.outdir}"
+	input:
+	path(fastq_input)
+	output:
+	path("samplelist.csv")
+	
+	script:
+	"""
+	ls -1 ${fastq_input} > sample.csv
+	realpath ${fastq_input}/* > paths.csv
+	paste sample.csv paths.csv > samplelist.csv
+	sed -i 's/	/,/g' samplelist.csv
+	sed -i '1i SampleName,SamplePath' samplelist.csv
+	"""
+
+}
+
 //merge fastq files for each SampleName and create a merged file for each SampleNames
 process merge_fastq {
 	publishDir "${params.outdir}/merged"
@@ -70,10 +88,18 @@ process splitbam {
 	path("${SampleName}_*_*_idxstats.txt"),emit:full_idxstats
 	path("${SampleName}_*.bam"),emit:bam
 	tuple val(SampleName),path("${SampleName}_consensus.fasta"),emit:consensus
+	path("${SampleName}_unfilt_stats.txt"),emit:unfilt_stats
+	path("${SampleName}_flagstat.txt"),emit:flagstat
+	path ("${SampleName}_unfilt_idxstats.csv"),emit:unfilt_idxstats
 	script:
 	"""
+	samtools view -b -h ${SamplePath}|samtools sort > ${SampleName}_unfilt.bam
+	samtools stats "${SampleName}_unfilt.bam" > ${SampleName}_unfilt_stats.txt
+	samtools flagstat "${SampleName}_unfilt.bam" > ${SampleName}_flagstat.txt
+	samtools index "${SampleName}_unfilt.bam" > ${SampleName}_unfilt.bai
+	samtools idxstats "${SampleName}_unfilt.bam" > ${SampleName}_unfilt_idxstats.csv
 #generate a  sorted bam file with primary alignments
-	samtools view -b -h -F 256 -q 30 ${SamplePath}|samtools sort > ${SampleName}.bam	
+	samtools view -b -h -F 0x900 -q 30 ${SamplePath}|samtools sort > ${SampleName}.bam	
 	samtools stats "${SampleName}.bam" > ${SampleName}_stats.txt
 #trims primers from both ends of the ampliocn using primer bed file
 	samtools ampliconclip --both-ends -b ${primerbed} "${SampleName}.bam"	> ${SampleName}_trimmed.bam
@@ -106,6 +132,7 @@ process splitbam {
 	sed -i '1i Amplicon_Name Size ${SampleName}' "${SampleName}_mappedreads.txt"
 	"""
 }
+
 
 //multiqc
 
@@ -153,7 +180,7 @@ process kraken2_consensus {
 
 	script:
 	"""
-	kraken2 --db $db_path --output ${SampleName}_cons_kraken.csv --report ${SampleName}_cons_kraken_report.csv --threads 1 ${SamplePath}
+	kraken2 --db $db_path --output ${SampleName}_cons_kraken.csv --report ${SampleName}_cons_kraken_report.csv --threads 1 ${SamplePath} --use-names --use-mpa-style
 	"""
 }
 
@@ -256,16 +283,29 @@ process make_report {
 	"""
 
 }
+process blast_cons {
+	publishDir "${params.outdir}/blast/",mode:"copy"
+	label "low"
+	input:
+	tuple val(SampleName),path(consensus)
+	output:
+	path("${SampleName}_blast.csv")
+	script:
+	"""
+
+	blastn -db nt -query ${consensus} -out ${SampleName}_blast.csv -outfmt "7 qseqid sseqid pident length evalue" -max_target_seqs 5 -remote 
+
+	"""
+
+}
 
 workflow {
 	data=Channel
 	.fromPath(params.input)
-	.splitCsv(header:true)
-    .map { row-> tuple(row.SampleName,row.SamplePath) }
+	merge_fastq(make_csv(data).splitCsv(header:true).map { row-> tuple(row.SampleName,row.SamplePath)})
 	reference=file(params.reference)
 	primerbed=file(params.primerbed)
-    merge_fastq(data)
-//trim barcodes and adapter sequences
+	//trim barcodes and adapter sequences
 	if (params.trim_barcodes){
 		porechop(merge_fastq.out)
 		minimap2(reference,porechop.out)
@@ -314,7 +354,7 @@ workflow {
 		centri_cons=centrifuge_consensus.out.centrifuge_cons
 		krona_centrifuge(centri_raw.collect(),centri_cons.collect())
 	}
-	stats=splitbam.out.stats
+	stats=splitbam.out.unfilt_stats
 	idxstats=splitbam.out.idxstats
 	multiqc(stats.mix(idxstats).collect())
 	rmd_file=file("${baseDir}/Bovreproseq_report.Rmd")
@@ -324,5 +364,6 @@ workflow {
 	if (params.centri_db){
 		make_report(krona_centrifuge.out.raw,splitbam.out.mapped.collect(),krona_centrifuge.out.cons,rmd_file)
 	}
+	//blast_cons(splitbam.out.consensus)
 
 }
