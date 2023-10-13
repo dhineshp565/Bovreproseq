@@ -48,7 +48,7 @@
                 "reference": {
                     "type": "string",
                     "default": "reference.fasta",
-                    "format": "path",
+                    "format": "file-path",
                     "description": "reference sequence in fasta format"
                 }
             }
