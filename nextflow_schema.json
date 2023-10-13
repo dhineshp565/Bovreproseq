@@ -12,7 +12,10 @@
             "description": "Define where the pipeline should find input data and save output data.",
             "required": [
                 "input",
-                "outdir"
+                "outdir",
+                "primerbed",
+                "kraken_db",
+                "reference"
             ],
             "properties": {
                 "input": {
@@ -33,14 +36,20 @@
                 },
                 "primerbed": {
                     "type": "string",
-                    "default": "primer.bed"
+                    "default": "primer.bed",
+                    "format": "path",
+                    "description": ".bed file with primer coordinates"
                 },
                 "kraken_db": {
-                    "type": "string"
+                    "type": "string",
+                    "format": "path",
+                    "description": "path to kraken database"
                 },
                 "reference": {
                     "type": "string",
-                    "default": "reference.fasta"
+                    "default": "reference.fasta",
+                    "format": "path",
+                    "description": "reference sequence in fasta format"
                 }
             }
         },
@@ -51,10 +60,16 @@
             "default": "",
             "properties": {
                 "trim_barcodes": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "optional. Please enter Yes if trimming is needed",
+                    "enum": [
+                        "Yes"
+                    ]
                 },
                 "centri_db": {
-                    "type": "string"
+                    "type": "string",
+                    "format": "path",
+                    "description": "path to centrifuge database"
                 }
             }
         }
