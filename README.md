@@ -1,19 +1,19 @@
 # Bovreproseq
 Targeted multiplex amplicon Sequencing for Bovine Reproductive Pathogens.
 Pipeline should work for any multiplex amplicon sequencing. Outputs consensus sequences,kraken,centrifuge, krona and multiqc report if any reads are mapped to reference. 
-Requires input csv file(SampleName, Samplepath), reference sequence (fasta),primerbedfile (chrom name-should match header in the reference sequence, primer start and end coordinates (5'-3')), the path to Kraken2 and centrifuge databases.
+Requires input directory with fastq folders, reference sequence (fasta),primerbedfile (chrom name-should match header in the reference sequence, primer start and end coordinates (5'-3')), the path to Kraken2 and centrifuge databases.
 
 conda or docker needs to be installed.
 
 Usage:
 ```
-nextflow run main.nf --input samplelist.csv --outdir Results --reference test_multi.fasta --primerbed primer.bed --kraken_db minikraken2_v1_8GB --centri_db centrifuge -profile docker
+nextflow run main.nf --input path_to_input --outdir Results --reference test_multi.fasta --primerbed primer.bed --kraken_db minikraken2_v1_8GB --centri_db centrifuge -profile docker
 ```
 
 ```
 Parameters:
 
---input      csv file with two columns with headers(SampleName,SamplePath).See samplelist.csv
+--input      Path to input directory
 --outdir     Output directory
 --reference  fasta or multi-fasta 
 --primerbed  Bovreproseq_primer.bed
