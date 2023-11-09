@@ -1,84 +1,154 @@
-Bacillus_licheniformis_adk	1	20	Blich-adk-F
-Bacillus_licheniformis_adk	498	518	Blich-adk-R
-Bacillus_licheniformis_gyrB	1	19	Blich-gyrB-F
-Bacillus_licheniformis_gyrB	594	613	Blich-gyrB-R
-BVDv_PF	1	20	BVDPF1
-BVDv_PF	265	285	BVDPR1
-BVDv_Npro	1	26	NproB31-F
-BVDv_Npro	415	441	NproB32-R
-Chlamydia_Spp_omp2	1	22	Chlamydia-ch1-omp2
-Chlamydia_Spp_omp2	565	587	Chlamydia-h2-omp2
-Chlamydiaabortus-Helicasegene	1	19	Cabortus-Helicasegene-F
-Chlamydiaabortus-Helicasegene	460	479	Cabortus-Helicasegene-R
-CFF_sapB2	1	24	Campylobacterfetusfetus_sapB2-F
-CFF_sapB2	342	366	Campylobacterfetusfetus_sapB2-R
-CampylobacterfetusMLST-aspA	1	21	CampylobacterfetusMLST-aspA-F
-CampylobacterfetusMLST-aspA	555	576	CampylobacterfetusMLST-aspA-R
-CampylobacterfetusMLST-glnA	1	20	CampylobacterfetusMLST-glnA-F
-CampylobacterfetusMLST-glnA	630	650	CampylobacterfetusMLST-glnA-R
-CampylobacterfetusMLST-gltA	1	20	CampylobacterfetusMLST-gltA-F
-CampylobacterfetusMLST-gltA	506	526	CampylobacterfetusMLST-gltA-R
-CampylobacterfetusMLST-glyA	1	22	CampylobacterfetusMLST-glyA-F
-CampylobacterfetusMLST-glyA	551	573	CampylobacterfetusMLST-glyA-R
-CampylobacterfetusMLST-pgm	1	20	CampylobacterfetusMLST-pgm-F
-CampylobacterfetusMLST-pgm	620	640	CampylobacterfetusMLST-pgm-R
-CampylobacterfetusMLST-tkt	1	22	CampylobacterfetusMLST-tkt-F
-CampylobacterfetusMLST-tkt	565	587	CampylobacterfetusMLST-tkt-R
-CampylobacterfetusMLST-uncA	1	20	CampylobacterfetusMLST-uncA-F
-CampylobacterfetusMLST-uncA	557	577	CampylobacterfetusMLST-uncA-R
-CFF_nahE	1	32	Campylobacterfetus-nahE-L
-CFF_nahE	358	390	Campylobacterfetus-nahE-R
-CFV_parA	1	25	CFV-VenSF
-CFV_parA	116	141	CFV-VenSR
-CFV_virB11nC1165g4	1	20	CFV-virB11nC1165g4-F
-CFV_virB11nC1165g4	213	233	CFV-virB11nC1165g4-R
-Coxiella_burnetti_CoxF2	1	19	CoxbF2
-Coxiella_burnetti_CoxF2	670	689	CoxbR4
-Coxiella_burnetti_Trans-1	1	22	CoxbTrans-1-F
-Coxiella_burnetti_Trans-1	664	686	CoxbTrans-2-R
-IC-EGFP	1	20	Egfp-F
-IC-EGFP	530	550	Egfp-R
-IBR-gBN	1	20	IBR-gBN-1
-IBR-gBN	365	385	IBR-gBN-2
-IBR-gE	1	20	IBR-gE-1c
-IBR-gE	245	265	IBR-gE-2
-Leptospira_borgpetersenii_LipL32	1	21	LeptoLipL32-Lau01-F
-Leptospira_borgpetersenii_LipL32	642	663	LeptoLipL32-Lau02-R
-Leptospira_borgpetersenii_16SrRNA	1	20	Leptospiraspp16SrRNA-F
-Leptospira_borgpetersenii_16SrRNA	522	542	Leptospiraspp16SrRNA-R
-Listeria_mono_hlyA	1	24	Listeria_mono_hlyA-F
-Listeria_mono_hlyA	433	457	Listeria_mono_hlyA-R
-Listeria_mono-LM1	1	19	Listeria_mono-LM1-F
-Listeria_mono-LM1	241	260	Listeria_mono-LM1-R
-Mycoplasam_bovis_gltx	1	20	Mplasmabovis-gltx-F
-Mycoplasam_bovis_gltx	510	530	Mplasmabovis-gltX-R
-Mycoplasma_bovis_gpsA	1	20	Mplasmabovis-gpsA-F
-Mycoplasma_bovis_gpsA	501	521	Mplasmabovis-gpsA-R
-Neospora_caninum_pNC-5gene	1	19	Neospora_caninumpNC-5geneNp21
-Neospora_caninum_pNC-5gene	309	328	Neospora_caninumpNC-5geneNp6
-Sarcocystis_spp	1	20	Sar-F1
-Sarcocystis_spp	600	620	Sar-F2
-Trichomonas_18s	1	19	TF-forward_18S
-Trichomonas_18s	348	367	TF-reverse_5.8S
-Toxoplasma_gondii_P30	1	20	Toxoplasma_gondii_DS38
-Toxoplasma_gondii_P30	500	520	Toxoplasma_gondii_DS39
-Tritichomonasfetus_ssRNA	1	26	Tritichomonasfetus_ssRNA_TFR3
-Tritichomonasfetus_ssRNA	322	348	Tritichomonasfetus_ssRNA_TFR4
-Trueperella_pyogenes_493bp_ploN	1	20	Trueperella_pyogenes_493bp_ploNF
-Trueperella_pyogenes_493bp_ploN	473	493	Trueperella_pyogenes_493bp_ploNR
-Ureaplasmadiversum-16sRNA	1	21	Ureaplasmadiversum-16sRNA_UDF
-Ureaplasmadiversum-16sRNA	290	311	Ureaplasmadiversum-16sRNA_UDR
-Ureaplasmaspp_UGP	1	20	Ureaplasmaspp_UGP-F
-Ureaplasmaspp_UGP	622	642	Ureaplasmaspp_UGP-R
-Trueperella_pyogenes_sodA	1	24	Tpyo_sodA-F
-Trueperella_pyogenes_sodA	178	199	Tpyo_sodA_R
-Campylobacterjejuni_cj0414	1	24	cj0414C1F 
-Campylobacterjejuni_cj0414	139	160	cj0414C1R
-Campylobacterjejuni_hipO	1	24	hipO-C.jejuni-F
-Campylobacterjejuni_hipO	319	344	hipO-C.jejuni-F
+Bacillus_licheniformis_adk	1	20	
+Bacillus_licheniformis_adk	498	518	
+Bacillus_licheniformis_gyrB	1	19	
+Bacillus_licheniformis_gyrB	594	613	
+BVDv_PF	1	20	
+BVDv_PF	265	285	
+BVDv_Npro	1	26	
+BVDv_Npro	415	441
+CampylobacterfetusMLST-aspA	1	21	
+CampylobacterfetusMLST-aspA	555	576	
+CampylobacterfetusMLST-glnA	1	20	
+CampylobacterfetusMLST-glnA	630	650	
+CampylobacterfetusMLST-gltA	1	20	
+CampylobacterfetusMLST-gltA	506	526	
+CampylobacterfetusMLST-glyA	1	22	
+CampylobacterfetusMLST-glyA	551	573	
+CampylobacterfetusMLST-pgm	1	20	
+CampylobacterfetusMLST-pgm	620	640	
+CampylobacterfetusMLST-tkt	1	22	
+CampylobacterfetusMLST-tkt	565	587	
+CampylobacterfetusMLST-uncA	1	20	
+CampylobacterfetusMLST-uncA	557	577	
+Campylobacterjejuni_cj0414	1	24	 
+Campylobacterjejuni_cj0414	139	160	
+Campylobacterjejuni_hipO	1	24	
+Campylobacterjejuni_hipO	319	344	
 Coccidia_Sarcocystishominis	1	23
 Coccidia_Sarcocystishominis	306	330
 Coccidia_Neosporacaninum	1	23
 Coccidia_Neosporacaninum	286	309
 Coccidia_Toxoplasmagondii	1	23	
 Coccidia_Toxoplasmagondii	285	309
+CFF_nahE	1	32	
+CFF_nahE	358	390	
+CFV_parA	1	25	
+CFV_parA	116	141	
+Chlamydia_Spp_omp2	1	22	
+Chlamydia_Spp_omp2	565	587
+Chlamydiaabortus-Helicasegene	1	19	
+Chlamydiaabortus-Helicasegene	460	479		
+Coxiella_burnetti_CoxF2	1	19	
+Coxiella_burnetti_CoxF2	670	689	
+Coxiella_burnetti_Trans-1	1	22	
+Coxiella_burnetti_Trans-1	664	686	
+IC-EGFP	1	20	
+IC-EGFP	530	550	
+IBR-gBN	1	20	
+IBR-gBN	365	385	
+IBR-gE	1	20	
+IBR-gE	245	265	
+Leptospira_borgpetersenii_LipL32	1	21	
+Leptospira_borgpetersenii_LipL32	642	663	
+Leptospira_borgpetersenii_16SrRNA	1	20	
+Leptospira_borgpetersenii_16SrRNA	522	542	
+Listeria_mono_hlyA	1	24	
+Listeria_mono_hlyA	433	457	
+Listeria_mono-LM1	1	19	
+Listeria_mono-LM1	241	260
+Mbovis_PpSM5	1	25	
+Mbovis_PpSM5	414	442
+Mbovis_uvrC	1	21
+Mbovis_uvrC	346	368	
+Neospora_caninum_pNC-5gene	1	19	
+Neospora_caninum_pNC-5gene	309	328	
+Sarcocystis_spp	1	20	
+Sarcocystis_spp	600	620	
+Trichomonas_18s	1	19	
+Trichomonas_18s	348	367	
+Toxoplasma_gondii_P30	1	20	
+Toxoplasma_gondii_P30	500	520	
+Tritichomonasfetus_ssRNA	1	26	
+Tritichomonasfetus_ssRNA	322	348	
+Trueperella_pyogenes_493bp_ploN	1	20	
+Trueperella_pyogenes_493bp_ploN	473	493
+Trueperella_pyogenes_sodA	1	24	
+Trueperella_pyogenes_sodA	178	199	
+Ureaplasmadiversum-16sRNA	1	21
+Ureaplasmadiversum-16sRNA	290	311
+Ureaplasmaspp_UGP	1	20	
+Ureaplasmaspp_UGP	622	642	
+Bovreproseq_synthpos_BVDv_5UTR	1	20
+Bovreproseq_synthpos_BVDv_5UTR	265	285
+Bovreproseq_synthpos_BVDv_NPro	1	26
+Bovreproseq_synthpos_BVDv_NPro	415	441
+Bovreproseq_synthpos_Chlamydia_abortus	1	19
+Bovreproseq_synthpos_Chlamydia_abortus	461	480
+Bovreproseq_synthpos_Chlamydia_spp-omp2	1	22
+Bovreproseq_synthpos_Chlamydia_spp-omp2 565 587
+Bovreproseq_synthpos_Campfetus_nahE	1	32
+Bovreproseq_synthpos_Campfetus_nahE	359	391
+Bovreproseq_synthpos_Campfetus_VensF	1	25
+Bovreproseq_synthpos_Campfetus_VensF	117	142
+Bovreproseq_synthpos_CampfetusMLST_aspA	1	21
+Bovreproseq_synthpos_CampfetusMLST_aspA	456	477
+Bovreproseq_synthpos_CampfetusMLST_glnA	1	20
+Bovreproseq_synthpos_CampfetusMLST_glnA	457	477
+Bovreproseq_synthpos_CampfetusMLST_gltA	1	20
+Bovreproseq_synthpos_CampfetusMLST_gltA	382	402
+Bovreproseq_synthpos_CampfetusMLST_glyA	1	22
+Bovreproseq_synthpos_CampfetusMLST_glyA	503	525
+Bovreproseq_synthpos_CampfetusMLST_pgmA	1	20
+Bovreproseq_synthpos_CampfetusMLST_pgmA	487	507
+Bovreproseq_synthpos_CampfetusMLST_tktA	1	22
+Bovreproseq_synthpos_CampfetusMLST_tktA	442	462
+Bovreproseq_synthpos_CampfetusMLST_uncA	1	20
+Bovreproseq_synthpos_CampfetusMLST_uncA	469	489
+Bovreproseq_synthpos_Coxiella_burnetii_COM1	1	19
+Bovreproseq_synthpos_Coxiella_burnetii_COM1	670	690
+Bovreproseq_synthpos_Coxiella_burnetii_transposonlike	1	22
+Bovreproseq_synthpos_Coxiella_burnetii_transposonlike	665	687
+Bovreproseq_synthpos_IBR-BoHV-1_gBN	1	20
+Bovreproseq_synthpos_IBR-BoHV-1_gBN	365	385
+Bovreproseq_synthpos_IBR-BoHV-1_gE	1	20
+Bovreproseq_synthpos_IBR-BoHV-1_gE	248	268
+Bovreproseq_synthpos_Leptospiraspp-LipL32	1	21
+Bovreproseq_synthpos_Leptospiraspp-LipL32	640	661
+Bovreproseq_synthpos_Leptospiraspp_16s_rrs2	1	20
+Bovreproseq_synthpos_Leptospiraspp_16s_rrs2	523	543
+Bovreproseq_synthpos_Listeria_mono_LM1	1	19
+Bovreproseq_synthpos_Listeria_mono_LM1	241	260
+Bovreproseq_synthpos_Listeria_mono_hlyA	1	24
+Bovreproseq_synthpos_Listeria_mono_hlyA	432	456
+Bovreproseq_synthpos_Neosporacaninum_NC_5gene_NP21	1	19
+Bovreproseq_synthpos_Neosporacaninum_NC_5gene_NP21	309	328
+Bovreproseq_synthpos_Trich_fetus	1	16
+Bovreproseq_synthpos_Trich_fetus	321	347
+Bovreproseq_synthpos_TF_18S	1	19
+Bovreproseq_synthpos_TF_18S	348 366
+Bovreproseq_synthpos_Ureaplasma_diversum_16sRNA	1	21
+Bovreproseq_synthpos_Ureaplasma_diversum_16sRNA	290	311
+Bovreproseq_synthpos_Ureaplasma_Sp_16s	1	20
+Bovreproseq_synthpos_Ureaplasma_Sp_16s	622	642
+Bovreproseq_synthpos_Blich-adk	1	20
+Bovreproseq_synthpos_Blich-adk	499	598	
+Bovreproseq_synthpos_Blich-gyrB	1	19
+Bovreproseq_synthpos_Blich-gyrB	594	612
+Bovreproseq_synthpos_Tpy_ploN	1	20
+Bovreproseq_synthpos_Tpy_ploN	471	490
+Bovreproseq_synthpos_T_gondii_DS38	1	20
+Bovreproseq_synthpos_T_gondii_DS38	531	550
+Bovreproseq_synthpos_Sarcocystis_Spp	1	20
+Bovreproseq_synthpos_Sarcocystis_Spp	591	609
+Bovreproseq_synthpos_Coccidia_18s	1	23	
+Bovreproseq_synthpos_Coccidia_18s	296	320	
+Bovreproseq_synthpos_Cjejuni_0414	1	24
+Bovreproseq_synthpos_Cjejuni_0414	139	160	
+Bovreproseq_synthpos_Cjejuni_HipO_new	1	26
+Bovreproseq_synthpos_Cjejuni_HipO_new	321	344
+Bovreproseq_synthpos_Trueperella_pyo_sodA	1	22
+Bovreproseq_synthpos_Trueperella_pyo_sodA	175	199
+Bovreproseq_synthpos_Mbovis_PpSM5	1	25
+Bovreproseq_synthpos_Mbovis_PpSM5	414	442
+Bovreproseq_synthpos_Mbovis_uvrC	1	21
+Bovreproseq_synthpos_Mbovis_uvrC	346	368
