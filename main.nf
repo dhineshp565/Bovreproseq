@@ -76,7 +76,7 @@ process minimap2 {
 //split bam files and create consensus
 process splitbam {
 	publishDir "${params.outdir}/splitbam",mode:"copy"
-	label "medium"
+	label "high"
 	input:
 	tuple val(SampleName),path(SamplePath)
 	path (primerbed)
@@ -85,8 +85,6 @@ process splitbam {
 	path("${SampleName}_stats.txt"),emit:stats
 	path("${SampleName}_mappedreads.txt"),emit:mapped
 	path("${SampleName}_idxstats.txt"),emit:idxstats
-	path("${SampleName}_*_*_idxstats.txt"),emit:full_idxstats
-	path("${SampleName}_*.bam"),emit:bam
 	tuple val(SampleName),path("${SampleName}_consensus.fasta"),emit:consensus
 	path("${SampleName}_unfilt_stats.txt"),emit:unfilt_stats
 	path("${SampleName}_flagstat.txt"),emit:flagstat
@@ -109,25 +107,31 @@ process splitbam {
 	samtools index "${SampleName}_tr_sorted.bam" > ${SampleName}_sorted.bai
 	samtools idxstats "${SampleName}_tr_sorted.bam" > ${SampleName}_idxstats.txt
 	awk '{if (\$3 >= 10) print \$1,\$2,\$3}' "${SampleName}_idxstats.txt" > ${SampleName}_mappedreads.txt
+	if [ \$(wc -l < "${SampleName}_mappedreads.txt") -ne 0 ]
+	then 
 #using the list of mapped amplicons from text file, bam file is split based on amplicons and consensus is gen
-	while read lines
-	do 
-		amp=\$(echo \$lines|cut -f1 -d' ')
-		len=\$(echo \$lines|cut -f2 -d' ')
-		# split bam 
-		samtools view -b "${SampleName}_tr_sorted.bam" "\${amp}" > ${SampleName}_\${amp}.bam
-		# Only reads length with + or - 50 bases is used for consenus
-	    samtools view -h "${SampleName}_\${amp}.bam"|awk -v l=\${len} '/^@/|| length(\$10)>=l-50 && length(\$10)<=l+50'|samtools sort > ${SampleName}_\${len}_\${amp}.bam
-		# generate stats for near full length reads
-		samtools index "${SampleName}_\${len}_\${amp}.bam" > ${SampleName}_\${len}_\${amp}.bai
-		samtools idxstats "${SampleName}_\${len}_\${amp}.bam" > ${SampleName}_\${len}_\${amp}_idxstats.txt
-		# generate consensus for full length reads
-		samtools consensus -f fasta "${SampleName}_\${len}_\${amp}.bam" > ${SampleName}_\${amp}.fasta
-		# change fasta header with sample and amplicon names
-		sed -i "s/>.*/>${SampleName}_\${amp}_consensus/" ${SampleName}_\${amp}.fasta
-	done < "${SampleName}_mappedreads.txt"
-	# merge consensus from all amplicons
-	cat ${SampleName}_*.fasta > ${SampleName}_consensus.fasta
+		while read lines
+		do 
+			amp=\$(echo \$lines|cut -f1 -d' ')
+			len=\$(echo \$lines|cut -f2 -d' ')
+			# split bam 
+			samtools view -b "${SampleName}_tr_sorted.bam" "\${amp}" > ${SampleName}_\${amp}.bam
+			# Only reads length with + or - 50 bases is used for consenus
+			samtools view -h "${SampleName}_\${amp}.bam"|awk -v l=\${len} '/^@/|| length(\$10)>=l-50 && length(\$10)<=l+50'|samtools sort > ${SampleName}_\${len}_\${amp}.bam
+			# generate stats for near full length reads
+			samtools index "${SampleName}_\${len}_\${amp}.bam" > ${SampleName}_\${len}_\${amp}.bai
+			samtools idxstats "${SampleName}_\${len}_\${amp}.bam" > ${SampleName}_\${len}_\${amp}_idxstats.txt
+			# generate consensus for full length reads
+			samtools consensus -f fasta "${SampleName}_\${len}_\${amp}.bam" > ${SampleName}_\${amp}.fasta
+			# change fasta header with sample and amplicon names
+			sed -i "s/>.*/>${SampleName}_\${amp}_consensus/" ${SampleName}_\${amp}.fasta
+		done < "${SampleName}_mappedreads.txt"
+		# merge consensus from all amplicons
+		cat ${SampleName}_*.fasta > ${SampleName}_consensus.fasta
+	else
+		echo -e ">${SampleName} No consensus\n" > ${SampleName}_consensus.fasta
+
+	fi
 	# insert headers to mappedreads.txt
 	sed -i '1i Amplicon_Name Size ${SampleName}' "${SampleName}_mappedreads.txt"
 	"""
@@ -175,12 +179,12 @@ process kraken2_consensus {
 	path(db_path)
 	
 	output:
-	path ("${SampleName}_cons_kraken.csv")
-	path ("${SampleName}_cons_kraken_report.csv"),emit:(kraken2_cons)
+	path ("${SampleName}_cons_kraken.csv"),emit:(kraken2_cons)
+	path ("${SampleName}_cons_kraken_report.csv")
 
 	script:
 	"""
-	kraken2 --db $db_path --output ${SampleName}_cons_kraken.csv --report ${SampleName}_cons_kraken_report.csv --threads 1 ${SamplePath} --use-names --use-mpa-style
+	kraken2 --db $db_path --output ${SampleName}_cons_kraken.csv --report ${SampleName}_cons_kraken_report.csv --threads 3 ${SamplePath} --use-names --use-mpa-style
 	"""
 }
 
@@ -261,25 +265,39 @@ process make_report {
 	publishDir "${params.outdir}/results_report/",mode:"copy"
 	label "low"
 	input:
+	path (csv)
 	path(krona_reports_raw)
 	path(mappedreads)
-	path(krona_reports_cons)
+	path(kraken_cons)
+	path(abricate)
 	path(rmdfile)
 	output:
 	path("Bovreproseq_results_report.html")
 	script:
 	"""
+	
+	cp ${csv} samples.csv
 	cp ${krona_reports_raw} rawreads.html
-	cp ${krona_reports_cons} Cons_classified.html
-	mkdir mapped_reads
-	for i in ${mappedreads}
+	for i in *mappedreads.txt
 	do
-		cp \${i} mapped_reads
+	 	if [ \$(wc -l < "\${i}" ) -eq 0 ]
+		 then
+	 		echo "Amplicon_Name Size Reads" >> \${i}
+			echo "NA NA NA" >> \${i}
+	 	fi
 	done
+	for k in *_cons_kraken.csv
+	do
+		if [ \$(wc -l < "\${k}" ) -eq 0 ]
+		then
+			echo "C	NO READS FOUND	NA" >> \${k}	
+	 	fi
+	done
+
 	cp ${rmdfile} report.Rmd
 	
 
-	Rscript -e 'rmarkdown::render(input="report.Rmd",params=list(dire="mapped_reads/",krona_raw="rawreads.html",krona_consensus="Cons_classified.html"),output_file = "Bovreproseq_results_report.html")'
+	Rscript -e 'rmarkdown::render(input="report.Rmd",params=list(csv="samples.csv",krona="rawreads.html"),output_file = "Bovreproseq_results_report.html")'
 	"""
 
 }
@@ -297,6 +315,20 @@ process blast_cons {
 
 	"""
 
+}
+process abricate{
+	publishDir "${params.outdir}/abricate/",mode:"copy"
+	label "medium"
+	input:
+	tuple val(SampleName),path(consensus)
+	path(dbdir)
+	output:
+	path("${SampleName}_abricate.csv")
+	script:
+	"""
+	abricate --datadir ${dbdir} --db Bovreproseq -minid 60  -mincov 60 --quiet ${consensus} 1> ${SampleName}_abricate.csv
+	"""
+	
 }
 
 workflow {
@@ -357,13 +389,15 @@ workflow {
 	stats=splitbam.out.unfilt_stats
 	idxstats=splitbam.out.idxstats
 	multiqc(stats.mix(idxstats).collect())
-	rmd_file=file("${baseDir}/Bovreproseq_report.Rmd")
+	rmd_file=file("${baseDir}/Bovreproseq_tabbed.Rmd")
+	//blast_cons(splitbam.out.consensus)
+	dbdir=("${baseDir}/Bovreproseq_db")
+	abricate(splitbam.out.consensus,dbdir)
 	if (params.kraken_db){
-		make_report(krona_kraken.out.raw,splitbam.out.mapped.collect(),krona_kraken.out.cons,rmd_file)
+		make_report(make_csv.out,krona_kraken.out.raw,splitbam.out.mapped.collect(),kraken_cons.collect(),abricate.out.collect(),rmd_file)
 	}
 	if (params.centri_db){
-		make_report(krona_centrifuge.out.raw,splitbam.out.mapped.collect(),krona_centrifuge.out.cons,rmd_file)
+		make_report(make_csv.out,krona_centrifuge.out.raw,splitbam.out.mapped.collect(),centri_cons.collect(),abricate.out.collect(),rmd_file)
 	}
-	//blast_cons(splitbam.out.consensus)
 
 }
