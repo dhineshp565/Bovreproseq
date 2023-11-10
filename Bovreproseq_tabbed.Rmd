@@ -1,0 +1,62 @@
+---
+title: "Bovreproseq Results"
+author: "Dhinesh"
+date: "`r Sys.Date()`"
+output: html_document
+params:
+  csv: ""
+  krona: ""
+---
+
+```{r setup, include=FALSE}
+library(knitr)
+library(ggplot2)
+library(htmltools)
+```
+
+
+<br>
+
+
+### RESULTS {.tabset .tabset-dropdown}
+```{r, results='asis',echo=FALSE}
+
+samplelist <- read.csv(params$csv,header=FALSE,sep = ',')[-1,]
+sampleid <- samplelist[,c(1)]
+
+for (i in sampleid){
+  cat("####", i, "\n")
+  mapped_reads <- (paste(i,"_mappedreads.txt",sep=""))
+  df <- read.csv(mapped_reads,header = TRUE,sep=" ")
+  mapped_stat<-df[,c(1,3)]
+  colnames (mapped_stat) <- c("AMPLICON","NO. OF MAPPED READS")
+  print(knitr::kable(mapped_stat,align="ll",caption = "MAPPED READS-Generated using minimap2 and samtools"))
+  cat('\n\n<!-- -->\n\n')
+  abricate_ids <- (paste(i,"_abricate.csv",sep=""))
+  abricate_raw <- read.csv(abricate_ids,header = TRUE,sep = "\t")
+  abricate_final <- abricate_raw[,c(2,6,10,11,15)]
+  colnames(abricate_final) <- c("SEQUENCE","GENE","%COVERAGE","%IDENTITY","REFERENCE")
+  # print(knitr::kable(abricate_final,align = "llccl",caption = "BOVREPROSEQ Amplicons - \n Predicted using abricate tool with custom database as option. For more info please see https://github.com/tseemann/abricate"))
+  cat('\n\n<!-- -->\n\n')
+  kraken_ids <- (paste(i,"_cons_kraken.csv",sep=""))
+  kraken_df <- read.csv(kraken_ids,header = FALSE,sep = "\t")
+  kraken_final <- kraken_df[,c(2,3)]
+  colnames (kraken_final) <- c("SEQUENCE","KRAKEN2 Classification")
+  #print(knitr::kable(kraken_final,align="ll",caption = "KRAKEN2 taxonomic classification of consensus sequences"))
+  cat('\n\n<!-- -->\n\n')
+  right_merged <- merge(abricate_final,kraken_final, by = "SEQUENCE", all.y = TRUE)
+  print(knitr::kable(right_merged,align = "llccl",caption = "BOVREPROSEQ Amplicons - \n Predicted using abricate tool with custom database as option. For more info please see https://github.com/tseemann/abricate"))
+  cat('\n\n<!-- -->\n\n')
+}
+```
+<br>
+
+## Taxonomic classification of raw reads 
+
+```{r, echo=FALSE}
+library("htmltools")
+htmltools::tags$iframe(
+  src = base64enc::dataURI(file= params$krona, mime="text/html; charset=UTF-8"),
+  style="border:10; position:relative; top:0; left:; right::; bottom:; width:100%; height:800px"
+)
+```
