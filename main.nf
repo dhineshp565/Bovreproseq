@@ -1,6 +1,8 @@
 #!/usr/bin/env nextflow
 nextflow.enable.dsl=2
 
+// make csv file with headers from the given input
+
 process make_csv {
 	publishDir "${params.outdir}"
 	input:
@@ -10,10 +12,14 @@ process make_csv {
 	
 	script:
 	"""
+	# get list of sample names
 	ls -1 ${fastq_input} > sample.csv
+	# get path of each folder
 	realpath ${fastq_input}/* > paths.csv
+	# concatenate samplenames and path with comma as delimiter
 	paste sample.csv paths.csv > samplelist.csv
 	sed -i 's/	/,/g' samplelist.csv
+	# add headers to the csv file
 	sed -i '1i SampleName,SamplePath' samplelist.csv
 	"""
 
@@ -72,8 +78,7 @@ process minimap2 {
         """
 }
 
-//convert minimap2 output sam to sorted bam, create reference index and bed file from the given reference input
-//split bam files and create consensus
+//convert minimap2 output sam to sorted bam and split bam files and create consensus
 process splitbam {
 	publishDir "${params.outdir}/splitbam",mode:"copy"
 	label "high"
@@ -91,6 +96,7 @@ process splitbam {
 	path ("${SampleName}_unfilt_idxstats.csv"),emit:unfilt_idxstats
 	script:
 	"""
+# generate stats prior to read filtering
 	samtools view -b -h ${SamplePath}|samtools sort > ${SampleName}_unfilt.bam
 	samtools stats "${SampleName}_unfilt.bam" > ${SampleName}_unfilt_stats.txt
 	samtools flagstat "${SampleName}_unfilt.bam" > ${SampleName}_flagstat.txt
@@ -107,6 +113,7 @@ process splitbam {
 	samtools index "${SampleName}_tr_sorted.bam" > ${SampleName}_sorted.bai
 	samtools idxstats "${SampleName}_tr_sorted.bam" > ${SampleName}_idxstats.txt
 	awk '{if (\$3 >= 10) print \$1,\$2,\$3}' "${SampleName}_idxstats.txt" > ${SampleName}_mappedreads.txt
+#conditional for empty mapped reads.txt file
 	if [ \$(wc -l < "${SampleName}_mappedreads.txt") -ne 0 ]
 	then 
 #using the list of mapped amplicons from text file, bam file is split based on amplicons and consensus is gen
@@ -138,7 +145,7 @@ process splitbam {
 }
 
 
-//multiqc
+//multiqc generate mapped read statistics from samtools output
 
 process multiqc {
 	publishDir "${params.outdir}/multiqc/",mode:"copy"
@@ -260,7 +267,7 @@ process krona_centrifuge {
 	ktImportTaxonomy -t 5 -m 3 -o consensus_classified.html ${consensus}
 	"""
 }
-
+//make html reprot with rmarkdown
 process make_report {
 	publishDir "${params.outdir}/results_report/",mode:"copy"
 	label "low"
@@ -268,9 +275,10 @@ process make_report {
 	path (csv)
 	path(krona_reports_raw)
 	path(mappedreads)
-	path(kraken_cons)
+	//path(kraken_cons)
 	path(abricate)
 	path(rmdfile)
+	path(mlst)
 	output:
 	path("Bovreproseq_results_report.html")
 	script:
@@ -278,6 +286,7 @@ process make_report {
 	
 	cp ${csv} samples.csv
 	cp ${krona_reports_raw} rawreads.html
+	# handle empty mapped reads files
 	for i in *mappedreads.txt
 	do
 	 	if [ \$(wc -l < "\${i}" ) -eq 0 ]
@@ -286,13 +295,14 @@ process make_report {
 			echo "NA NA NA" >> \${i}
 	 	fi
 	done
-	for k in *_cons_kraken.csv
-	do
-		if [ \$(wc -l < "\${k}" ) -eq 0 ]
-		then
-			echo "C	NO READS FOUND	NA" >> \${k}	
-	 	fi
-	done
+	# handle empty kraken consensus files
+	#for k in *_cons_kraken.csv
+	#do
+	#	#if [ \$(wc -l < "\${k}" ) -eq 0 ]
+	#	#then
+	#		echo "C	NO READS FOUND	NA" >> \${k}	
+	 #	fi
+	#done
 
 	cp ${rmdfile} report.Rmd
 	
@@ -301,21 +311,30 @@ process make_report {
 	"""
 
 }
+// performs remote blast of the consensus sequences
 process blast_cons {
 	publishDir "${params.outdir}/blast/",mode:"copy"
-	label "low"
+	label "high"
 	input:
 	tuple val(SampleName),path(consensus)
+	path (taxdb)
 	output:
-	path("${SampleName}_blast.csv")
+	path("${SampleName}_report_blast.csv")
+	
 	script:
 	"""
 
-	blastn -db nt -query ${consensus} -out ${SampleName}_blast.csv -outfmt "7 qseqid sseqid pident length evalue" -max_target_seqs 5 -remote 
-
+	cp ${taxdb}/* ./
+	blastn -db nt -query ${consensus} -out ${SampleName}_blast.csv -outfmt "7 qseqid sseqid length qcovs pident evalue" -max_target_seqs 1 -remote
+	grep -v "#" ${SampleName}_blast.csv|sort|uniq > ${SampleName}_report_blast.csv
+	sed -i '1i queryid\tsubject_id\talignment length\tquery_coverage\t%identity\tevalue\tscinames' ${SampleName}_report_blast.csv
+	
 	"""
 
 }
+
+
+// uses custome database to predict the presence of the amplicons
 process abricate{
 	publishDir "${params.outdir}/abricate/",mode:"copy"
 	label "medium"
@@ -330,6 +349,39 @@ process abricate{
 	"""
 	
 }
+
+process mlst {
+	publishDir "${params.outdir}/mlst/",mode:"copy"
+	label "medium"
+	input:
+	tuple val(SampleName),path(consensus)
+	output:
+	path("${SampleName}_MLST_results.csv")
+	script:
+	"""
+	mlst --legacy --scheme campylobacter_nonjejuni_9 ${consensus} > ${SampleName}_MLST.csv
+	shopt -s extglob
+	ST="\$(tail -n +2 ${SampleName}_MLST.csv | cut -f 3)"
+	if [  \$ST -eq "4" -o \$ST -eq "7" -o \$ST -eq "12" ];then
+		echo "ORGANISM" > temp.csv
+		echo "Campylobacter fetus. venerealis" >> temp.csv
+		paste ${SampleName}_MLST.csv temp.csv > ${SampleName}_MLST_results.csv
+	
+	elif [ \$ST -eq "1" -o \$ST -eq "2" -o \$ST -eq "3" -o \$ST -eq "5" -o \$ST -eq "6" -o \$ST -eq "8" -o \$ST -eq "9" -o \$ST -eq "10" -o \$ST -eq "11" -o \$ST -eq "13" -o \$ST -eq "14" ];then
+		echo "ORGANISM" > temp.csv
+		echo "Campylobacter fetus. fetus" >> temp.csv
+		paste ${SampleName}_MLST.csv temp.csv > ${SampleName}_MLST_results.csv
+		
+	else 
+		
+		echo "ORGANISM" > temp.csv
+		echo "NA" >> temp.csv
+		paste ${SampleName}_MLST.csv temp.csv > ${SampleName}_MLST_results.csv
+		
+	fi
+	"""
+}
+
 
 workflow {
 	data=Channel
@@ -367,6 +419,8 @@ workflow {
 			centrifuge(merge_fastq.out,centri)
 		}
 	}
+
+	// create consensus
 	splitbam(minimap2.out,primerbed)
 	
 	//condition for kraken2 classification
@@ -386,18 +440,27 @@ workflow {
 		centri_cons=centrifuge_consensus.out.centrifuge_cons
 		krona_centrifuge(centri_raw.collect(),centri_cons.collect())
 	}
+	// qc report using split bam out put
 	stats=splitbam.out.unfilt_stats
 	idxstats=splitbam.out.idxstats
 	multiqc(stats.mix(idxstats).collect())
-	rmd_file=file("${baseDir}/Bovreproseq_tabbed.Rmd")
-	//blast_cons(splitbam.out.consensus)
+	
+	// abricate 
 	dbdir=("${baseDir}/Bovreproseq_db")
 	abricate(splitbam.out.consensus,dbdir)
+	
+	//tax=("${baseDir}/taxdb")
+	//blast_cons(splitbam.out.consensus,tax,db1)
+
+	mlst(splitbam.out.consensus)
+	//generate report
+	rmd_file=file("${baseDir}/Bovreproseq_tabbed.Rmd")
 	if (params.kraken_db){
-		make_report(make_csv.out,krona_kraken.out.raw,splitbam.out.mapped.collect(),kraken_cons.collect(),abricate.out.collect(),rmd_file)
+		make_report(make_csv.out,krona_kraken.out.raw,splitbam.out.mapped.collect(),abricate.out.collect(),rmd_file,mlst.out.collect())
 	}
 	if (params.centri_db){
-		make_report(make_csv.out,krona_centrifuge.out.raw,splitbam.out.mapped.collect(),centri_cons.collect(),abricate.out.collect(),rmd_file)
+		make_report(make_csv.out,krona_centrifuge.out.raw,splitbam.out.mapped.collect(),abricate.out.collect(),rmd_file,mlst.out.collect())
 	}
-
+	
+	
 }

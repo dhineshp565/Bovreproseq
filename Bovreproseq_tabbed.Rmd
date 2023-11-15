@@ -1,6 +1,6 @@
 ---
-title: "Bovreproseq Results"
-author: "Dhinesh"
+title: "Bovreproseq Results Report"
+author: "Bovreproseq primer version #3 - Diagnostic Samples"
 date: "`r Sys.Date()`"
 output: html_document
 params:
@@ -16,9 +16,14 @@ library(htmltools)
 
 
 <br>
+```{css, echo=FALSE}
+.table caption {
+    color: darkblue;
+    font-weight: bold;
+}
+```
 
-
-### RESULTS {.tabset .tabset-dropdown}
+### Click dropdown to select sample {.tabset .tabset-dropdown}
 ```{r, results='asis',echo=FALSE}
 
 samplelist <- read.csv(params$csv,header=FALSE,sep = ',')[-1,]
@@ -26,29 +31,41 @@ sampleid <- samplelist[,c(1)]
 
 for (i in sampleid){
   cat("####", i, "\n")
+  #use mappedreads.txt and display column 1 and 3
   mapped_reads <- (paste(i,"_mappedreads.txt",sep=""))
   df <- read.csv(mapped_reads,header = TRUE,sep=" ")
   mapped_stat<-df[,c(1,3)]
-  colnames (mapped_stat) <- c("AMPLICON","NO. OF MAPPED READS")
-  print(knitr::kable(mapped_stat,align="ll",caption = "MAPPED READS-Generated using minimap2 and samtools"))
+  colnames (mapped_stat) <- c("AMPLICON","MAPPED_READS")
+  print(knitr::kable(mapped_stat,align="ll",caption = "NO. OF MAPPED READS. Generated using minimap2 and samtools"))
   cat('\n\n<!-- -->\n\n')
+  #fig <- plot_ly(mapped_stat, x = "AMPLICON", y = "MAPPED_READS", type = 'bar', name = 'Mapped reads')
+  #print(fig)
+  #plot=ggplot(mapped_stat,aes(x = !!rlang::sym(colnames(mapped_stat)[1]),y = !!rlang::sym(colnames(mapped_stat)[2])))+geom_bar(stat="identity",fill='darkgreen',width=0.8)+scale_y_log10()+theme(aspect.ratio = 1/2)
+  #print(plot+coord_flip())
+  # display abricate results
   abricate_ids <- (paste(i,"_abricate.csv",sep=""))
   abricate_raw <- read.csv(abricate_ids,header = TRUE,sep = "\t")
-  abricate_final <- abricate_raw[,c(2,6,10,11,15)]
-  colnames(abricate_final) <- c("SEQUENCE","GENE","%COVERAGE","%IDENTITY","REFERENCE")
-  # print(knitr::kable(abricate_final,align = "llccl",caption = "BOVREPROSEQ Amplicons - \n Predicted using abricate tool with custom database as option. For more info please see https://github.com/tseemann/abricate"))
+  abricate_final <- abricate_raw[,c(2,6,10,11,12,15)]
+  colnames(abricate_final) <- c("SEQUENCE","GENE","%COVERAGE","%IDENTITY","DATABASE","REFERENCE")
+  print(knitr::kable(abricate_final,align = "llcccl",caption = "Consensus compared to reference database. Generated using abricate and custom database"))
+  mlst_ids <- (paste(i,"_MLST_results.csv",sep=""))
+  mlst_raw <- read.csv(mlst_ids,header = TRUE,sep = "\t")
+  mlst_final <- mlst_raw[,c(1,3,11)]
+  if (grepl("fetus", mlst_final$ORGANISM)) {
+  print(knitr::kable(mlst_final,align = "lcl",caption = "MLST tool Tseeman (https://github.com/tseemann/mlst). Scans contig files against traditional PubMLST typing schemes"))
+  }
   cat('\n\n<!-- -->\n\n')
-  kraken_ids <- (paste(i,"_cons_kraken.csv",sep=""))
-  kraken_df <- read.csv(kraken_ids,header = FALSE,sep = "\t")
-  kraken_final <- kraken_df[,c(2,3)]
-  colnames (kraken_final) <- c("SEQUENCE","KRAKEN2 Classification")
-  #print(knitr::kable(kraken_final,align="ll",caption = "KRAKEN2 taxonomic classification of consensus sequences"))
-  cat('\n\n<!-- -->\n\n')
-  right_merged <- merge(abricate_final,kraken_final, by = "SEQUENCE", all.y = TRUE)
-  print(knitr::kable(right_merged,align = "llccl",caption = "BOVREPROSEQ Amplicons - \n Predicted using abricate tool with custom database as option. For more info please see https://github.com/tseemann/abricate"))
-  cat('\n\n<!-- -->\n\n')
+ 
+
+  #blast_ids <- (paste(i,"_report_blast.csv",sep=""))
+  #blast_df <- read.csv(blast_ids,header = TRUE,sep = "\t")
+  #colnames(blast_df) <- c("SEQUENCE","ACCESSION","LENGTH","%COVERAGE","%IDENTITY","Evalue","ORGANISM")
+  #print(knitr::kable(blast_df,align="lcr",caption = "BLAST hits of consensus sequences.Only displays the top hit"))
+  #cat('\n\n<!-- -->\n\n')
 }
 ```
+<br>
+
 <br>
 
 ## Taxonomic classification of raw reads 
