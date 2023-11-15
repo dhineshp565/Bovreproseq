@@ -35,7 +35,7 @@
                 },
                 "primerbed": {
                     "type": "string",
-                    "default": "primer.bed",
+                    "default": "Bovreproseq_primer.bed",
                     "format": "file-path",
                     "description": ".bed file with primer coordinates"
                 },
@@ -46,7 +46,7 @@
                 },
                 "reference": {
                     "type": "string",
-                    "default": "reference.fasta",
+                    "default": "Bovreproseq_reference.fasta",
                     "format": "file-path",
                     "description": "reference sequence in fasta format"
                 }
