@@ -12,7 +12,8 @@
             "description": "Define where the pipeline should find input data and save output data.",
             "required": [
                 "input",
-                "kraken_db"
+                "kraken_db",
+                "out_dir"
             ],
             "properties": {
                 "input": {
