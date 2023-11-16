@@ -12,6 +12,7 @@
             "description": "Define where the pipeline should find input data and save output data.",
             "required": [
                 "input",
+                "kraken_db",
                 "outdir"
             ],
             "properties": {
@@ -22,6 +23,11 @@
                     "description": "Path to directory with fastq directories",
                     "help_text": "Use this parameter to specify the location of fastq directories.",
                     "fa_icon": "fas fa-folder-open"
+                },
+                "kraken_db": {
+                    "type": "string",
+                    "description": "Path to kraken2 database with bacteria,virus and protozoa",
+                    "fa_icon": "fas fa-database"
                 },
                 "outdir": {
                     "type": "string",
@@ -36,15 +42,5 @@
         {
             "$ref": "#/definitions/input_output_options"
         }
-    ],
-    "properties": {
-        "kraken_db": {
-            "type": "string",
-            "description": "path to kraken2 database",
-            "fa_icon": "fas fa-database"
-        }
-    },
-    "required": [
-        "kraken_db"
     ]
 }
