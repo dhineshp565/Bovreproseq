@@ -383,6 +383,7 @@ process mlst {
 }
 
 
+
 workflow {
 	data=Channel
 	.fromPath(params.input)
