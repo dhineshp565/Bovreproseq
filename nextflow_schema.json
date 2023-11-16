@@ -37,11 +37,31 @@
                     "fa_icon": "fas fa-folder-open"
                 }
             }
+        },
+        "new_group_1": {
+            "title": "New Group 1",
+            "type": "object",
+            "description": "",
+            "default": "",
+            "properties": {
+                "trim_barcodes": {
+                    "type": "string",
+                    "enum": [
+                        "No",
+                        "Yes"
+                    ],
+                    "default": "No",
+                    "description": "Select Yes to trim barcodes and adapter sequences otherwise leave this option unchanged."
+                }
+            }
         }
     },
     "allOf": [
         {
             "$ref": "#/definitions/input_output_options"
+        },
+        {
+            "$ref": "#/definitions/new_group_1"
         }
     ]
 }
