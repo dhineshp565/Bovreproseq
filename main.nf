@@ -387,8 +387,8 @@ workflow {
 	data=Channel
 	.fromPath(params.input)
 	merge_fastq(make_csv(data).splitCsv(header:true).map { row-> tuple(row.SampleName,row.SamplePath)})
-	reference=file(params.reference)
-	primerbed=file(params.primerbed)
+	reference=file("${baseDir}/Bovreproseq_reference.fasta")
+	primerbed=file("${baseDir}/Bovreproseq_primer.bed")
 	//trim barcodes and adapter sequences
 	if (params.trim_barcodes){
 		porechop(merge_fastq.out)
