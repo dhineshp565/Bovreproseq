@@ -27,7 +27,8 @@
                 "kraken_db": {
                     "type": "string",
                     "description": "Path to kraken2 database with bacteria,virus and protozoa",
-                    "fa_icon": "fas fa-database"
+                    "fa_icon": "fas fa-database",
+                    "format": "directory-path"
                 },
                 "outdir": {
                     "type": "string",
