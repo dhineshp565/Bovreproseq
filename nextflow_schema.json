@@ -42,15 +42,13 @@
             "title": "Optional",
             "type": "object",
             "description": "Optional parameters",
-            "default": "No",
+            "default": "",
             "properties": {
                 "trim_barcodes": {
                     "type": "string",
                     "enum": [
-                        "No",
                         "Yes"
                     ],
-                    "default": "No",
                     "description": "Select Yes to trim barcodes and adapter sequences otherwise leave this option unchanged."
                 }
             }
