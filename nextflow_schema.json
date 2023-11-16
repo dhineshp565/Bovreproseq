@@ -13,7 +13,7 @@
             "required": [
                 "input",
                 "kraken_db",
-                "outdir"
+                "out_dir"
             ],
             "properties": {
                 "input": {
@@ -30,7 +30,7 @@
                     "fa_icon": "fas fa-database",
                     "format": "directory-path"
                 },
-                "outdir": {
+                "out_dir": {
                     "type": "string",
                     "format": "directory-path",
                     "description": "The output directory where the results will be saved. You have to use absolute paths to storage on Cloud infrastructure.",
