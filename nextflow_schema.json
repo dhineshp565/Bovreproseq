@@ -11,19 +11,17 @@
             "fa_icon": "fas fa-terminal",
             "description": "Define where the pipeline should find input data and save output data.",
             "required": [
-                "input",
                 "outdir",
-                "primerbed",
-                "kraken_db",
-                "reference"
+                "input"
             ],
             "properties": {
                 "input": {
                     "type": "string",
-                    "format": "path",
+                    "format": "directory-path",
                     "exists": true,
                     "mimetype": "text/csv",
-                    "description": "Input directory conatining fastq _dir",
+                    "pattern": "^\\S+\\.csv$",
+                    "description": "path to directory containing fastq directories",
                     "help_text": "You will need to create a design file with information about the samples in your experiment before running the pipeline. Use this parameter to specify its location. It has to be a comma-separated file with 3 columns, and a header row.",
                     "fa_icon": "fas fa-folder-open"
                 },
@@ -32,38 +30,6 @@
                     "format": "directory-path",
                     "description": "The output directory where the results will be saved. You have to use absolute paths to storage on Cloud infrastructure.",
                     "fa_icon": "fas fa-folder-open"
-                },
-                "primerbed": {
-                    "type": "string",
-                    "default": "Bovreproseq_primer.bed",
-                    "format": "file-path",
-                    "description": ".bed file with primer coordinates"
-                },
-                "kraken_db": {
-                    "type": "string",
-                    "format": "path",
-                    "description": "path to kraken database"
-                },
-                "reference": {
-                    "type": "string",
-                    "default": "Bovreproseq_reference.fasta",
-                    "format": "file-path",
-                    "description": "reference sequence in fasta format"
-                }
-            }
-        },
-        "optional": {
-            "title": "Optional",
-            "type": "object",
-            "description": "",
-            "default": "",
-            "properties": {
-                "trim_barcodes": {
-                    "type": "string",
-                    "description": "optional. Please enter Yes if trimming is needed",
-                    "enum": [
-                        "Yes"
-                    ]
                 }
             }
         }
@@ -71,9 +37,14 @@
     "allOf": [
         {
             "$ref": "#/definitions/input_output_options"
-        },
-        {
-            "$ref": "#/definitions/optional"
         }
+    ],
+    "properties": {
+        "kraken_db": {
+            "type": "string"
+        }
+    },
+    "required": [
+        "kraken_db"
     ]
 }
