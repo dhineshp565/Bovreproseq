@@ -38,11 +38,11 @@
                 }
             }
         },
-        "new_group_1": {
-            "title": "New Group 1",
+        "Optional": {
+            "title": "Optional",
             "type": "object",
-            "description": "",
-            "default": "",
+            "description": "Optional parameters",
+            "default": "No",
             "properties": {
                 "trim_barcodes": {
                     "type": "string",
@@ -61,7 +61,7 @@
             "$ref": "#/definitions/input_output_options"
         },
         {
-            "$ref": "#/definitions/new_group_1"
+            "$ref": "#/definitions/Optional"
         }
     ]
 }
