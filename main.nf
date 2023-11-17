@@ -63,7 +63,7 @@ process merge_fastq {
 //trim barcodes and adapter using porechop
 
 process porechop {
-	label "medium"
+	label "high"
 	publishDir "${params.outdir}/trimmed"
 	input:
 	tuple val(SampleName),path(SamplePath)
@@ -77,7 +77,7 @@ process porechop {
 // sequence alignment using minimap2
 process minimap2 {
         publishDir "${params.outdir}/minimap2/",mode:"copy"
-		label "low"
+	label "low"
         input:
         path (reference)
         tuple val(SampleName),path(SamplePath)
