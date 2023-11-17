@@ -12,15 +12,21 @@ process make_csv {
 	
 	script:
 	"""
-	# get list of sample names
-	ls -1 ${fastq_input} > sample.csv
+	# get list of directories and replace slash
+
+	ls -d */ ${fastq_input} > sample.csv
+
+	sed -i 's#/##g' sample.csv
+
 	# get path of each folder
 	realpath ${fastq_input}/* > paths.csv
+
 	# concatenate samplenames and path with comma as delimiter
 	paste sample.csv paths.csv > samplelist.csv
 	sed -i 's/	/,/g' samplelist.csv
 	# add headers to the csv file
 	sed -i '1i SampleName,SamplePath' samplelist.csv
+	
 	"""
 
 }
