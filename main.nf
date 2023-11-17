@@ -39,12 +39,16 @@ process merge_fastq {
 	count=\$(ls -1 ${SamplePath}/*.gz 2>/dev/null | wc -l)
 	
 	
-		if [[ "\${count}" != "0" ]];
+		if [[ "\${count}" != "0" ]]
 		then
 			cat ${SamplePath}/*.fastq.gz > ${SampleName}.fastq.gz
 		
 		else
-			cat ${SamplePath}/*.fastq > ${SampleName}.fastq
+			count=\$(ls -1 ${SamplePath}/*.fastq 2>/dev/null | wc -l)
+			if [[ "\${count}" != "0" ]]
+			then
+				cat ${SamplePath}/*.fastq > ${SampleName}.fastq
+			fi
 		fi
 	"""
 }
