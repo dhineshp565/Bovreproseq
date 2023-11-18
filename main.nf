@@ -68,7 +68,8 @@ process minimap2 {
         path (reference)
         tuple val(SampleName),path(SamplePath)
         output:
-        tuple val(SampleName),path ("${SampleName}.sam")
+        val(SampleName)
+		path ("${SampleName}.sam")
         script:
         """
         minimap2 -ax map-ont ${reference} ${SamplePath} > ${SampleName}.sam
@@ -80,7 +81,8 @@ process splitbam {
 	publishDir "${params.outdir}/splitbam",mode:"copy"
 	label "high"
 	input:
-	tuple val(SampleName),path(SamplePath)
+	val(SampleName)
+	path(SamplePath)
 	path (primerbed)
 	output:
 	val(SampleName),emit:SampleName
@@ -93,51 +95,8 @@ process splitbam {
 	path ("${SampleName}_unfilt_idxstats.csv"),emit:unfilt_idxstats
 	script:
 	"""
-# generate stats prior to read filtering
-	samtools view -b -h ${SamplePath}|samtools sort > ${SampleName}_unfilt.bam
-	samtools stats "${SampleName}_unfilt.bam" > ${SampleName}_unfilt_stats.txt
-	samtools flagstat "${SampleName}_unfilt.bam" > ${SampleName}_flagstat.txt
-	samtools index "${SampleName}_unfilt.bam" > ${SampleName}_unfilt.bai
-	samtools idxstats "${SampleName}_unfilt.bam" > ${SampleName}_unfilt_idxstats.csv
-#generate a  sorted bam file with primary alignments
-	samtools view -b -h -F 0x900 -q 30 ${SamplePath}|samtools sort > ${SampleName}.bam	
-	samtools stats "${SampleName}.bam" > ${SampleName}_stats.txt
-#trims primers from both ends of the ampliocn using primer bed file
-	samtools ampliconclip --both-ends -b ${primerbed} "${SampleName}.bam"	> ${SampleName}_trimmed.bam
-# sorts the bam file for spitting	
-	samtools sort "${SampleName}_trimmed.bam" > ${SampleName}_tr_sorted.bam
-#index sorted bam file and generate read counts for each amplicon
-	samtools index "${SampleName}_tr_sorted.bam" > ${SampleName}_sorted.bai
-	samtools idxstats "${SampleName}_tr_sorted.bam" > ${SampleName}_idxstats.txt
-	awk '{if (\$3 >= 10) print \$1,\$2,\$3}' "${SampleName}_idxstats.txt" > ${SampleName}_mappedreads.txt
-#conditional for empty mapped reads.txt file
-	if [ \$(wc -l < "${SampleName}_mappedreads.txt") -ne 0 ]
-	then 
-#using the list of mapped amplicons from text file, bam file is split based on amplicons and consensus is gen
-		while read lines
-		do 
-			amp=\$(echo \$lines|cut -f1 -d' ')
-			len=\$(echo \$lines|cut -f2 -d' ')
-			# split bam 
-			samtools view -b "${SampleName}_tr_sorted.bam" "\${amp}" > ${SampleName}_\${amp}.bam
-			# Only reads length with + or - 50 bases is used for consenus
-			samtools view -h "${SampleName}_\${amp}.bam"|awk -v l=\${len} '/^@/|| length(\$10)>=l-50 && length(\$10)<=l+50'|samtools sort > ${SampleName}_\${len}_\${amp}.bam
-			# generate stats for near full length reads
-			samtools index "${SampleName}_\${len}_\${amp}.bam" > ${SampleName}_\${len}_\${amp}.bai
-			samtools idxstats "${SampleName}_\${len}_\${amp}.bam" > ${SampleName}_\${len}_\${amp}_idxstats.txt
-			# generate consensus for full length reads
-			samtools consensus -f fasta "${SampleName}_\${len}_\${amp}.bam" > ${SampleName}_\${amp}.fasta
-			# change fasta header with sample and amplicon names
-			sed -i "s/>.*/>${SampleName}_\${amp}_consensus/" ${SampleName}_\${amp}.fasta
-		done < "${SampleName}_mappedreads.txt"
-		# merge consensus from all amplicons
-		cat ${SampleName}_*.fasta > ${SampleName}_consensus.fasta
-	else
-		echo -e ">${SampleName} No consensus\n" > ${SampleName}_consensus.fasta
+	splitbam.sh ${SampleName} ${SamplePath} ${primerbed}
 
-	fi
-	# insert headers to mappedreads.txt
-	sed -i '1i Amplicon_Name Size ${SampleName}' "${SampleName}_mappedreads.txt"
 	"""
 }
 
