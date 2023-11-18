@@ -12,22 +12,8 @@ process make_csv {
 	
 	script:
 	"""
-	# get list of directories and replaced slash
+	makecsv.sh ${fastq_input}
 
-	ls -d */ ${fastq_input} > samples.csv
-
-	sed -i 's#/##g' samples.csv
-
-	# get path of each folder
-	realpath ${fastq_input}/* > paths.csv
-
-	# concatenate samplenames and path with comma as delimiter
-	paste samples.csv paths.csv > samplelist.csv
-	sed -i 's/	/,/g' samplelist.csv
-	
-	# add headers to the csv file
-	sed -i '1i SampleName,SamplePath' samplelist.csv
-	
 	"""
 
 }
@@ -77,7 +63,7 @@ process porechop {
 // sequence alignment using minimap2
 process minimap2 {
         publishDir "${params.outdir}/minimap2/",mode:"copy"
-	label "low"
+		label "low"
         input:
         path (reference)
         tuple val(SampleName),path(SamplePath)
@@ -371,25 +357,7 @@ process mlst {
 	script:
 	"""
 	mlst --legacy --scheme campylobacter_nonjejuni_9 ${consensus} > ${SampleName}_MLST.csv
-	shopt -s extglob
-	ST="\$(tail -n +2 ${SampleName}_MLST.csv | cut -f 3)"
-	if [  \$ST -eq "4" -o \$ST -eq "7" -o \$ST -eq "12" ];then
-		echo "ORGANISM" > temp.csv
-		echo "Campylobacter fetus. venerealis" >> temp.csv
-		paste ${SampleName}_MLST.csv temp.csv > ${SampleName}_MLST_results.csv
-	
-	elif [ \$ST -eq "1" -o \$ST -eq "2" -o \$ST -eq "3" -o \$ST -eq "5" -o \$ST -eq "6" -o \$ST -eq "8" -o \$ST -eq "9" -o \$ST -eq "10" -o \$ST -eq "11" -o \$ST -eq "13" -o \$ST -eq "14" ];then
-		echo "ORGANISM" > temp.csv
-		echo "Campylobacter fetus. fetus" >> temp.csv
-		paste ${SampleName}_MLST.csv temp.csv > ${SampleName}_MLST_results.csv
-		
-	else 
-		
-		echo "ORGANISM" > temp.csv
-		echo "NA" >> temp.csv
-		paste ${SampleName}_MLST.csv temp.csv > ${SampleName}_MLST_results.csv
-		
-	fi
+	campmlst.sh ${SampleName}_MLST.csv
 	"""
 }
 
