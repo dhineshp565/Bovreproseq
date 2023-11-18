@@ -36,6 +36,9 @@ then
 			samtools view -b "$1_tr_sorted.bam" "${amp}" > $1_${amp}.bam
 			# Only reads length with + or - 50 bases is used for consenus
 			samtools view -h "$1_${amp}.bam"|awk -v l=${len} '/^@/|| length($10)>=l-50 && length($10)<=l+50'|samtools sort > $1_${len}_${amp}.bam
+			# generate stats for near full length reads
+			samtools index "$1_${len}_${amp}.bam" > $1_${len}_${amp}.bai
+			samtools idxstats "$1_${len}_${amp}.bam" > $1_${len}_${amp}_idxstats.txt
 			# generate consensus for full length reads
 			samtools consensus -f fasta "$1_${len}_${amp}.bam" > $1_${amp}.fasta
 			# change fasta header with sample and amplicon names
@@ -49,4 +52,8 @@ else
 
 fi
 	# insert headers to mappedreads.txt
+<<<<<<< HEAD
+sed -i '1i Amplicon_Name Size #Mapped_reads' "$1_mappedreads.txt"
+=======
 sed -i '1i Amplicon_Name Size $1' "$1_mappedreads.txt"
+>>>>>>> a76da0ff34ae7cf3357a957dd74696110eacf048
