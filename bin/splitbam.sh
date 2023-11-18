@@ -4,7 +4,7 @@
 # filters q30 and primary alignmnets and creates consensus of each amplicon in a sample
 # also generates read statistics on filtered and unfiltered reads read statistics
 # ouput are used in almost all subsequet process in the workflow
-# $1 = SampleNAme ,$2 = Input path of sam file from minimap2, $3 = primerbed file with primer coordinates for primer trimming
+# $1 = SampleName ,$2 = Input path of sam file from minimap2, $3 = primerbed file with primer coordinates for primer trimming
 
 
 # generate stats prior to read filtering
