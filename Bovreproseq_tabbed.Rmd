@@ -52,7 +52,7 @@ for (i in sampleid){
   mlst_raw <- read.csv(mlst_ids,header = TRUE,sep = "\t")
   mlst_final <- mlst_raw[,c(1,3,11)]
   if (grepl("fetus", mlst_final$ORGANISM)) {
-  print(knitr::kable(mlst_final,align = "lcl",caption = "MLST tool Tseeman (https://github.com/tseemann/mlst). Scans contig files against traditional PubMLST typing schemes"))
+  print(knitr::kable(mlst_final,align = "lcl",caption = "MLST tool from github (https://github.com/tseemann/mlst). Scans contig files against traditional PubMLST typing schemes"))
   }
   cat('\n\n<!-- -->\n\n')
  
