@@ -1,6 +1,10 @@
 #!/bin/env bash
 
-# This script takes the sam file from minimap2 acnd creates consensus of each amplicon in a sample and also creates read statistics and 
+# This script takes the sam file from minimap2,
+# filters q30 and primary alignmnets and creates consensus of each amplicon in a sample
+# also generates read statistics on filtered and unfiltered reads read statistics
+# ouput are used in almost all subsequet process in the workflow
+# $1 = SampleNAme ,$2 = Input path of sam file from minimap2, $3 = primerbed file with primer coordinates for primer trimming
 
 
 # generate stats prior to read filtering
@@ -12,7 +16,7 @@ samtools idxstats "$1_unfilt.bam" > $1_unfilt_idxstats.csv
 #generate a  sorted bam file with primary alignments
 samtools view -b -h -F 0x900 -q 30 $2|samtools sort > $1.bam	
 samtools stats "$1.bam" > $1_stats.txt
-#trims primers from both ends of the ampliocn using primer bed file
+#trims primers from both ends of the amplicon using primer bed file
 samtools ampliconclip --both-ends -b $3 "$1.bam"	> $1_trimmed.bam
 # sorts the bam file for spitting	
 samtools sort "$1_trimmed.bam" > $1_tr_sorted.bam
@@ -23,7 +27,7 @@ awk '{if ($3 >= 10) print $1,$2,$3}' "$1_idxstats.txt" > $1_mappedreads.txt
 #conditional for empty mapped reads.txt file
 if [ $(wc -l < "$1_mappedreads.txt") -ne 0 ]
 then 
-#using the list of mapped amplicons from text file, bam file is split based on amplicons and consensus is gen
+#using the list of mapped amplicons from text file, bam file is split based on amplicons and consensus is generated
 	while read lines
 	do 
 			amp=$(echo $lines|cut -f1 -d' ')
