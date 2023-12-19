@@ -52,8 +52,4 @@ else
 
 fi
 	# insert headers to mappedreads.txt
-<<<<<<< HEAD
 sed -i '1i Amplicon_Name Size #Mapped_reads' "$1_mappedreads.txt"
-=======
-sed -i '1i Amplicon_Name Size $1' "$1_mappedreads.txt"
->>>>>>> a76da0ff34ae7cf3357a957dd74696110eacf048
