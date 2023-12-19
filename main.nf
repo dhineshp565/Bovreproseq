@@ -226,6 +226,7 @@ process krona_centrifuge {
 //make html reprot with rmarkdown
 process make_report {
 	publishDir "${params.outdir}/results_report/",mode:"copy"
+	publishDir "${params.out_dir}/",mode:"copy"
 	label "low"
 	input:
 	path (csv)
