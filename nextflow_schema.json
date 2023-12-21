@@ -12,8 +12,7 @@
             "description": "Define where the pipeline should find input data and save output data.",
             "required": [
                 "input",
-                "kraken_db",
-                "outdir"
+                "kraken_db"
             ],
             "properties": {
                 "input": {
@@ -29,12 +28,6 @@
                     "description": "Path to kraken2 database with bacteria,virus and protozoa",
                     "fa_icon": "fas fa-database",
                     "format": "directory-path"
-                },
-                "outdir": {
-                    "type": "string",
-                    "format": "directory-path",
-                    "description": "The output directory where the results will be saved. You have to use absolute paths to storage on Cloud infrastructure.",
-                    "fa_icon": "fas fa-folder-open"
                 }
             }
         },
@@ -61,5 +54,11 @@
         {
             "$ref": "#/definitions/Optional"
         }
-    ]
+    ],
+    "properties": {
+        "out_dir": {
+            "type": "string",
+            "default": null
+        }
+    }
 }

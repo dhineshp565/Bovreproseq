@@ -1,10 +1,13 @@
 #!/usr/bin/env nextflow
 nextflow.enable.dsl=2
 
+// check parameters
+WorkflowMain.initialise(workflow, params, log)
+
 // make csv file with headers from the given input
 
 process make_csv {
-	publishDir "${params.outdir}"
+	publishDir "${params.out_dir}"
 	input:
 	path(fastq_input)
 	output:
@@ -20,7 +23,7 @@ process make_csv {
 
 //merge fastq files for each SampleName and create a merged file for each SampleNames
 process merge_fastq {
-	publishDir "${params.outdir}/merged"
+	publishDir "${params.out_dir}/merged"
 	label "low"
 	input:
 	tuple val(SampleName),path(SamplePath)
@@ -50,7 +53,7 @@ process merge_fastq {
 
 process porechop {
 	label "high"
-	publishDir "${params.outdir}/trimmed"
+	publishDir "${params.out_dir}/trimmed"
 	input:
 	tuple val(SampleName),path(SamplePath)
 	output:
@@ -62,7 +65,7 @@ process porechop {
 }
 // sequence alignment using minimap2
 process minimap2 {
-        publishDir "${params.outdir}/minimap2/",mode:"copy"
+        publishDir "${params.out_dir}/minimap2/",mode:"copy"
 		label "low"
         input:
         path (reference)
@@ -78,8 +81,8 @@ process minimap2 {
 
 //convert minimap2 output sam to sorted bam and split bam files and create consensus
 process splitbam {
-	publishDir "${params.outdir}/splitbam",mode:"copy"
-	label "high"
+	publishDir "${params.out_dir}/splitbam",mode:"copy"
+	label "medium"
 	input:
 	val(SampleName)
 	path(SamplePath)
@@ -104,7 +107,7 @@ process splitbam {
 //multiqc generate mapped read statistics from samtools output
 
 process multiqc {
-	publishDir "${params.outdir}/multiqc/",mode:"copy"
+	publishDir "${params.out_dir}/multiqc/",mode:"copy"
 	label "low"
 	input:
 	path '*'
@@ -119,7 +122,7 @@ process multiqc {
 
 //kraken2 for classification
 process kraken2 {
-	publishDir "${params.outdir}/kraken2/",mode:"copy"
+	publishDir "${params.out_dir}/kraken2/",mode:"copy"
 	label "high"
 	input:
 	tuple val(SampleName),path (SamplePath)
@@ -135,7 +138,7 @@ process kraken2 {
 	"""
 }
 process kraken2_consensus {
-	publishDir "${params.outdir}/kraken2_cons/",mode:"copy"
+	publishDir "${params.out_dir}/kraken2_cons/",mode:"copy"
 	label "high"
 	input:
 	tuple val(SampleName),path (SamplePath)
@@ -153,7 +156,7 @@ process kraken2_consensus {
 
 //centrifuge for taxonomy classification
 process centrifuge {
-	publishDir "${params.outdir}/centrifuge/",mode:"copy"
+	publishDir "${params.out_dir}/centrifuge/",mode:"copy"
 	label "high"
 	input:
 	tuple val(SampleName),path (SamplePath)
@@ -172,7 +175,7 @@ process centrifuge {
 	"""
 }
 process centrifuge_consensus {
-	publishDir "${params.outdir}/centrifuge_cons/",mode:"copy"
+	publishDir "${params.out_dir}/centrifuge_cons/",mode:"copy"
 	label "high"
 	input:
 	tuple val(SampleName),path (SamplePath)
@@ -192,7 +195,7 @@ process centrifuge_consensus {
 
 //krona plots
 process krona_kraken {
-	publishDir "${params.outdir}/krona_kraken/",mode:"copy"
+	publishDir "${params.out_dir}/krona_kraken/",mode:"copy"
 	label "low"
 	input:
 	path(raw)
@@ -208,7 +211,7 @@ process krona_kraken {
 	"""
 }
 process krona_centrifuge {
-	publishDir "${params.outdir}/krona_centrifuge/",mode:"copy"
+	publishDir "${params.out_dir}/krona_centrifuge/",mode:"copy"
 	label "low"
 	input:
 	path(raw)
@@ -225,8 +228,8 @@ process krona_centrifuge {
 }
 //make html reprot with rmarkdown
 process make_report {
-	publishDir "${params.outdir}/results_report/",mode:"copy"
-	publishDir "${params.out_dir}/",mode:"copy"
+	publishDir "${params.out_dir}/results_report/",mode:"copy"
+	
 	label "low"
 	input:
 	path (csv)
@@ -270,7 +273,7 @@ process make_report {
 }
 // performs remote blast of the consensus sequences
 process blast_cons {
-	publishDir "${params.outdir}/blast/",mode:"copy"
+	publishDir "${params.out_dir}/blast/",mode:"copy"
 	label "high"
 	input:
 	tuple val(SampleName),path(consensus)
@@ -293,8 +296,8 @@ process blast_cons {
 
 // uses custome database to predict the presence of the amplicons
 process abricate{
-	publishDir "${params.outdir}/abricate/",mode:"copy"
-	label "medium"
+	publishDir "${params.out_dir}/abricate/",mode:"copy"
+	label "low"
 	input:
 	tuple val(SampleName),path(consensus)
 	path(dbdir)
@@ -308,8 +311,8 @@ process abricate{
 }
 
 process mlst {
-	publishDir "${params.outdir}/mlst/",mode:"copy"
-	label "medium"
+	publishDir "${params.out_dir}/mlst/",mode:"copy"
+	label "low"
 	input:
 	tuple val(SampleName),path(consensus)
 	output:
