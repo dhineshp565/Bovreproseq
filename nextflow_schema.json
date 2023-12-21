@@ -37,6 +37,12 @@
             "description": "Optional parameters",
             "default": "",
             "properties": {
+                "out_dir": {
+                    "type": "string",
+                    "default": "None",
+                    "format": "directory-path",
+                    "description": "Output directory"
+                },
                 "trim_barcodes": {
                     "type": "string",
                     "enum": [
