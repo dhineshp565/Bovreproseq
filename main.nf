@@ -226,9 +226,9 @@ process krona_centrifuge {
 	ktImportTaxonomy -t 5 -m 3 -o consensus_classified.html ${consensus}
 	"""
 }
-//make html reprot with rmarkdown
+//make html report with rmarkdown
 process make_report {
-	publishDir "${params.out_dir}/results_report/",mode:"copy"
+	publishDir "${params.out_dir}/",mode:"copy"
 	
 	label "low"
 	input:
