@@ -54,11 +54,5 @@
         {
             "$ref": "#/definitions/Optional"
         }
-    ],
-    "properties": {
-        "out_dir": {
-            "type": "string",
-            "default": null
-        }
-    }
+    ]
 }
