@@ -1,8 +1,7 @@
 #!/usr/bin/env nextflow
 nextflow.enable.dsl=2
 
-// check parameters
-WorkflowMain.initialise(workflow, params, log)
+
 
 // make csv file with headers from the given input
 
