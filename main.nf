@@ -27,8 +27,8 @@ process merge_fastq {
 	input:
 	tuple val(SampleName),path(SamplePath)
 	output:
-	tuple val(SampleName),path("${SampleName}.{fastq,fastq.gz}")
-	
+	tuple val(SampleName),path("${SampleName}_filtered.{fastq,fastq.gz}"),emit:reads
+	path ("${SampleName}_readstats.csv")
 	shell:
 	"""
 	count=\$(ls -1 ${SamplePath}/*.gz 2>/dev/null | wc -l)
@@ -37,12 +37,16 @@ process merge_fastq {
 		if [[ "\${count}" != "0" ]]
 		then
 			cat ${SamplePath}/*.fastq.gz > ${SampleName}.fastq.gz
+			nanoq -i ${SampleName}.fastq.gz -s -H > ${SampleName}_readstats.csv
+			nanoq -i ${SampleName}.fastq.gz -q 20 -o ${SampleName}_filtered.fastq.gz
 		
 		else
 			count=\$(ls -1 ${SamplePath}/*.fastq 2>/dev/null | wc -l)
 			if [[ "\${count}" != "0" ]]
 			then
 				cat ${SamplePath}/*.fastq > ${SampleName}.fastq
+				nanoq -i ${SampleName}.fastq.gz -s -H > ${SampleName}_readstats.csv
+				nanoq -i ${SampleName}.fastq -q 20 -o ${SampleName}_filtered.fastq
 			fi
 		fi
 	"""
@@ -88,13 +92,11 @@ process splitbam {
 	path (primerbed)
 	output:
 	val(SampleName),emit:SampleName
-	path("${SampleName}_stats.txt"),emit:stats
 	path("${SampleName}_mappedreads.txt"),emit:mapped
 	path("${SampleName}_idxstats.txt"),emit:idxstats
 	tuple val(SampleName),path("${SampleName}_consensus.fasta"),emit:consensus
 	path("${SampleName}_unfilt_stats.txt"),emit:unfilt_stats
-	path("${SampleName}_flagstat.txt"),emit:flagstat
-	path ("${SampleName}_unfilt_idxstats.csv"),emit:unfilt_idxstats
+	path ("${SampleName}_full_length_mappedreads.txt"),emit:full_reads
 	script:
 	"""
 	splitbam.sh ${SampleName} ${SamplePath} ${primerbed}
@@ -333,11 +335,11 @@ workflow {
 	primerbed=file("${baseDir}/Bovreproseq_primer.bed")
 	//trim barcodes and adapter sequences
 	if (params.trim_barcodes){
-		porechop(merge_fastq.out)
+		porechop(merge_fastq.out.reads)
 		minimap2(reference,porechop.out)
 		 
 	} else {
-            minimap2(reference,merge_fastq.out)
+            minimap2(reference,merge_fastq.out.reads)
 		
         }
 	// conditional for trim barcodes option
@@ -354,11 +356,11 @@ workflow {
 	 } else {
 		if (params.kraken_db){
 			kraken=params.kraken_db
-			kraken2(merge_fastq.out,kraken)
+			kraken2(merge_fastq.out.reads,kraken)
 		}
 		if (params.centri_db){
 			centri=params.centri_db
-			centrifuge(merge_fastq.out,centri)
+			centrifuge(merge_fastq.out.reads,centri)
 		}
 	}
 
