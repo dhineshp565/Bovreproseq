@@ -6,18 +6,14 @@
 # ouput are used in almost all subsequet process in the workflow
 # $1 = SampleName ,$2 = Input path of sam file from minimap2, $3 = primerbed file with primer coordinates for primer trimming
 
-
 # generate stats prior to read filtering
 samtools view -b -h $2|samtools sort > $1_unfilt.bam
 samtools stats "$1_unfilt.bam" > $1_unfilt_stats.txt
-samtools flagstat "$1_unfilt.bam" > $1_flagstat.txt
-samtools index "$1_unfilt.bam" > $1_unfilt.bai
-samtools idxstats "$1_unfilt.bam" > $1_unfilt_idxstats.csv
 #generate a  sorted bam file with primary alignments
 samtools view -b -h -F 0x900 -q 30 $2|samtools sort > $1.bam	
 samtools stats "$1.bam" > $1_stats.txt
 #trims primers from both ends of the amplicon using primer bed file
-samtools ampliconclip --both-ends -b $3 "$1.bam"	> $1_trimmed.bam
+samtools ampliconclip --both-ends -b $3 "$1.bam" > $1_trimmed.bam
 # sorts the bam file for spitting	
 samtools sort "$1_trimmed.bam" > $1_tr_sorted.bam
 #index sorted bam file and generate read counts for each amplicon
@@ -32,20 +28,27 @@ then
 	do 
 			amp=$(echo $lines|cut -f1 -d' ')
 			len=$(echo $lines|cut -f2 -d' ')
+			 # get upper and lower bounds of reference span
+
+      		upper=`echo \$((\${len}+(\${len}*10/100)))`
+      		lower=`echo \$((\${len}-(\${len}*10/100)))`
+
 			# split bam 
 			samtools view -b "$1_tr_sorted.bam" "${amp}" > $1_${amp}.bam
-			# Only reads length with + or - 50 bases is used for consenus
-			samtools view -h "$1_${amp}.bam"|awk -v l=${len} '/^@/|| length($10)>=l-50 && length($10)<=l+50'|samtools sort > $1_${len}_${amp}.bam
+			# Only reads length with + or - 10% bases is used for consenus
+			samtools view -h "$1_${amp}.bam"|awk -v u=${upper} -v l=${lower} '/^@/|| length($10)>=l && length($10)<=u'|samtools sort > $1_${len}_${amp}.bam
 			# generate stats for near full length reads
 			samtools index "$1_${len}_${amp}.bam" > $1_${len}_${amp}.bai
 			samtools idxstats "$1_${len}_${amp}.bam" > $1_${len}_${amp}_idxstats.txt
+			awk '{if ($3 >= 10) print $1,$2,$3}' "$1_${len}_${amp}_idxstats.txt" > $1_${amp}_mappedreads.txt
 			# generate consensus for full length reads
-			samtools consensus -f fasta "$1_${len}_${amp}.bam" > $1_${amp}.fasta
+			samtools consensus -d 10 -A -f fasta "$1_${len}_${amp}.bam" > $1_${amp}.fasta
 			# change fasta header with sample and amplicon names
 			sed -i "s/>.*/>$1_${amp}_consensus/" $1_${amp}.fasta
 	done < "$1_mappedreads.txt"
 		# merge consensus from all amplicons
 		cat $1_*.fasta > $1_consensus.fasta
+		cat $1_*_mappedreads.txt > $1_full_length_mappedreads.txt
 # handle empty consensus. when there are no mapped reads.add sequence header
 else
 		echo -e ">$1 No consensus" > $1_consensus.fasta
