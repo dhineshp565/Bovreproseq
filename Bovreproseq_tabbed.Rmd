@@ -67,7 +67,7 @@ for (i in sampleid){
   # Provide a download link for the encoded FASTA content with file name
   cat('<a href="data:text/plain;charset=utf-8;base64,', encoded_content, '" download="', file_name, '">Download FASTA file</a>')
   
-
+  cat('\n\n<!-- -->\n\n')
 
   #blast_ids <- (paste(i,"_report_blast.csv",sep=""))
   #blast_df <- read.csv(blast_ids,header = TRUE,sep = "\t")
