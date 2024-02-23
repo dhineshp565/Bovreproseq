@@ -2,7 +2,7 @@
     "$schema": "http://json-schema.org/draft-07/schema",
     "$id": "https://raw.githubusercontent.com/Bovreproseq/master/nextflow_schema.json",
     "title": "Bovreproseq pipeline parameters",
-    "description": "Pipeline for generating results from targeted amplicon sequencing for Bovine reproductive pathogens",
+    "description": "Pipeline for generating results from targeted amplicon sequencing of Bovine reproductive pathogens",
     "type": "object",
     "definitions": {
         "input_output_options": {
@@ -19,35 +19,35 @@
                     "type": "string",
                     "format": "directory-path",
                     "exists": true,
-                    "description": "Path to directory with fastq directories",
-                    "help_text": "Use this parameter to specify the location of fastq directories.",
+                    "description": "Path to input directory containing fastq folders",
+                    "help_text": "You will need to create a design file with information about the samples in your experiment before running the pipeline. Use this parameter to specify its location. It has to be a comma-separated file with 3 columns, and a header row.",
                     "fa_icon": "fas fa-folder-open"
                 },
                 "kraken_db": {
                     "type": "string",
-                    "description": "Path to kraken2 database with bacteria,virus and protozoa",
                     "fa_icon": "fas fa-database",
-                    "format": "directory-path"
+                    "format": "directory-path",
+                    "description": "Path to kraken2 database"
                 },
                 "out_dir": {
                     "type": "string",
+                    "fa_icon": "far fa-folder-open",
                     "format": "directory-path",
-                    "description": "Output directory"
+                    "description": "Path to output directory"
                 }
             }
         },
-        "Optional": {
+        "optional": {
             "title": "Optional",
             "type": "object",
-            "description": "Optional parameters",
+            "description": "",
             "default": "",
             "properties": {
                 "trim_barcodes": {
                     "type": "string",
                     "enum": [
                         "Yes"
-                    ],
-                    "description": "Select Yes to trim barcodes and adapter sequences otherwise leave this option unchanged."
+                    ]
                 }
             }
         }
@@ -57,7 +57,7 @@
             "$ref": "#/definitions/input_output_options"
         },
         {
-            "$ref": "#/definitions/Optional"
+            "$ref": "#/definitions/optional"
         }
     ]
 }
