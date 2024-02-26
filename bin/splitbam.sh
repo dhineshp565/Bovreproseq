@@ -9,6 +9,8 @@
 # generate stats prior to read filtering
 samtools view -b -h $2|samtools sort > $1_unfilt.bam
 samtools stats "$1_unfilt.bam" > $1_unfilt_stats.txt
+samtools index "$1_unfilt.bam" > $1_unfilt.bai
+samtools idxstats "$1_unfilt.bam" > $1_unfilt_idxstats.csv
 #generate a  sorted bam file with primary alignments
 samtools view -b -h -F 0x900 -q 30 $2|samtools sort > $1.bam	
 samtools stats "$1.bam" > $1_stats.txt
