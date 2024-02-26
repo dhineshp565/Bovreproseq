@@ -97,7 +97,7 @@ process splitbam {
 	tuple val(SampleName),path("${SampleName}_consensus.fasta"),emit:consensus
 	path("${SampleName}_consensus.fasta"),emit:(cons_only)
 	path("${SampleName}_unfilt_stats.txt"),emit:unfilt_stats
-	path("${SampleName}_unfilt_idxstats.txt"),emit:unfilt_idx
+	path("${SampleName}_unfilt_idxstats.csv"),emit:unfilt_idx
 	path ("${SampleName}_full_length_mappedreads.txt"),emit:full_reads
 	script:
 	"""
