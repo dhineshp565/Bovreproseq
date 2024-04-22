@@ -106,6 +106,29 @@ process splitbam {
 	"""
 }
 
+process medaka {
+	publishDir "${params.out_dir}/medaka",mode:"copy"
+	label "high"
+	input:
+	tuple val(SampleName),path(SamplePath)
+	tuple val(SampleName),path(consensus)
+	val (medaka_model)
+	output:
+	tuple val(SampleName),path("${SampleName}_medaka_consensus.fasta"),emit:consensus
+	path("${SampleName}_medaka_consensus.fasta"),emit: cons_only
+	script:
+	"""
+	
+	if [ \$(wc -l < "${consensus}" ) -gt 1 ]
+		then
+		medaka_consensus -i ${SamplePath} -d ${consensus} -o ${SampleName}_medaka_consensus -m ${medaka_model}
+		mv ${SampleName}_medaka_consensus/consensus.fasta ${SampleName}_medaka_consensus.fasta
+	else 
+		echo ">${SampleName} No consensus sequences to polish" > ${SampleName}_medaka_consensus.fasta
+	fi
+	"""
+
+}
 
 //multiqc generate mapped read statistics from samtools output
 
@@ -276,7 +299,18 @@ process mlst {
 	"""
 }
 
+process client_report {
+	publishDir "${params.out_dir}/client_report/",mode:"copy"
+	label "low"
+	input:
+	path (abricate)
+	output:
+	path("Bovreproseq_results_report.html")
+	script:
+	"""
+	"""
 
+}
 
 workflow {
 	data=Channel
@@ -311,11 +345,18 @@ workflow {
 
 	// create consensus
 	splitbam(minimap2.out,primerbed)
+
+	//medaka polishing
+	if (params.trim_barcodes) {
+		medaka(porechop.out,splitbam.out.consensus,params.medaka_model)
+	} else {
+		medaka(merge_fastq.out.reads,splitbam.out.consensus,params.medaka_model)
+	}
 	
 	//condition for kraken2 classification
 	if (params.kraken_db){
 		kraken=params.kraken_db
-		kraken2_consensus(splitbam.out.consensus,kraken)
+		kraken2_consensus(medaka.out.consensus,kraken)
 		kraken_raw=kraken2.out.kraken2_raw
 		kraken_cons=kraken2_consensus.out.kraken2_cons
 		krona_kraken(kraken_raw.collect(),kraken_cons.collect())
@@ -329,16 +370,16 @@ workflow {
 	
 	// abricate 
 	dbdir=("${baseDir}/Bovreproseq_db")
-	abricate(splitbam.out.consensus,dbdir)
+	abricate(medaka.out.consensus,dbdir)
 	
 	//tax=("${baseDir}/taxdb")
 	//blast_cons(splitbam.out.consensus,tax,db1)
 
-	mlst(splitbam.out.consensus)
+	mlst(medaka.out.consensus)
 	//generate report
 	rmd_file=file("${baseDir}/Bovreproseq_tabbed.Rmd")
 	if (params.kraken_db){
-		make_report(make_csv.out,krona_kraken.out.raw,splitbam.out.mapped.collect(),abricate.out.collect(),rmd_file,mlst.out.collect(),splitbam.out.cons_only.collect())
+		make_report(make_csv.out,krona_kraken.out.raw,splitbam.out.mapped.collect(),abricate.out.collect(),rmd_file,mlst.out.collect(),medaka.out.cons_only.collect())
 	}
 	
 }

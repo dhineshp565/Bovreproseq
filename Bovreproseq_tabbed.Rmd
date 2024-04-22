@@ -54,7 +54,7 @@ for (i in sampleid){
   cat('\n\n<!-- -->\n\n')
 
   # Display fasta sequence
-  fasta_id <- (paste(i,"_consensus.fasta",sep=""))
+  fasta_id <- (paste(i,"_medaka_consensus.fasta",sep=""))
   fasta_file <- readLines(fasta_id)
   # Display the content
   cat("```\n")
