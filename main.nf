@@ -28,6 +28,7 @@ process merge_fastq {
 	tuple val(SampleName),path(SamplePath)
 	output:
 	tuple val(SampleName),path("${SampleName}_filtered.{fastq,fastq.gz}"),emit:reads
+	tuple val(SampleName),path("${SampleName}.{fastq,fastq.gz}"),emit:unfilt_reads
 	path ("${SampleName}_readstats.csv")
 	shell:
 	"""
@@ -37,6 +38,7 @@ process merge_fastq {
 		if [[ "\${count}" != "0" ]]
 		then
 			cat ${SamplePath}/*.fastq.gz > ${SampleName}.fastq.gz
+			
 			nanoq -i ${SampleName}.fastq.gz -s -H > ${SampleName}_readstats.csv
 			nanoq -i ${SampleName}.fastq.gz -q 20 -o ${SampleName}_filtered.fastq.gz
 		
@@ -44,13 +46,30 @@ process merge_fastq {
 			count=\$(ls -1 ${SamplePath}/*.fastq 2>/dev/null | wc -l)
 			if [[ "\${count}" != "0" ]]
 			then
-				cat ${SamplePath}/*.fastq > ${SampleName}.fastq
+				cat ${SamplePath}/*.fastq| gzip > ${SampleName}.fastq.gz
 				nanoq -i ${SampleName}.fastq.gz -s -H > ${SampleName}_readstats.csv
-				nanoq -i ${SampleName}.fastq -q 20 -o ${SampleName}_filtered.fastq
+				nanoq -i ${SampleName}.fastq.gz -q 20 -o ${SampleName}_filtered.fastq.gz
 			fi
 		fi
 	"""
 }
+
+process nanoplot {
+	label "low"
+	publishDir "${params.out_dir}/nanoplot",mode:"copy"
+	input:
+	tuple val(SampleName),path(SamplePath)
+	output:
+	path("${SampleName}_NanoStats.txt"),emit:stats
+	path("${SampleName}_NanoPlot-report.html")
+	script:
+	"""
+	NanoPlot --fastq *.fastq.gz -o nanoplot_report
+	mv nanoplot_report/NanoStats.txt ${SampleName}_NanoStats.txt
+	mv nanoplot_report/NanoPlot-report.html ${SampleName}_NanoPlot-report.html
+	"""
+}
+
 
 //trim barcodes and adapter using porechop
 
@@ -133,7 +152,7 @@ process medaka {
 //multiqc generate mapped read statistics from samtools output
 
 process multiqc {
-	publishDir "${params.out_dir}/multiqc/",mode:"copy"
+	publishDir "${params.out_dir}/",mode:"copy"
 	label "low"
 	input:
 	path '*'
@@ -318,6 +337,9 @@ workflow {
 	merge_fastq(make_csv(data).splitCsv(header:true).map { row-> tuple(row.SampleName,row.SamplePath)})
 	reference=file("${baseDir}/Bovreproseq_reference.fasta")
 	primerbed=file("${baseDir}/Bovreproseq_primer.bed")
+
+	//read statistics
+	nanoplot(merge_fastq.out.unfilt_reads)	
 	//trim barcodes and adapter sequences
 	if (params.trim_barcodes){
 		porechop(merge_fastq.out.reads)
@@ -366,7 +388,8 @@ workflow {
 	// qc report using split bam out put
 	stats=splitbam.out.unfilt_stats
 	idxstats=splitbam.out.idxstats
-	multiqc(stats.mix(idxstats).collect())
+	nanoqc=nanoplot.out.stats
+	multiqc(stats.mix(idxstats,nanoqc).collect())
 	
 	// abricate 
 	dbdir=("${baseDir}/Bovreproseq_db")
