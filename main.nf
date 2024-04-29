@@ -29,7 +29,7 @@ process merge_fastq {
 	output:
 	tuple val(SampleName),path("${SampleName}_filtered.{fastq,fastq.gz}"),emit:reads
 	tuple val(SampleName),path("${SampleName}.{fastq,fastq.gz}"),emit:unfilt_reads
-	path ("${SampleName}_readstats.csv")
+
 	shell:
 	"""
 	count=\$(ls -1 ${SamplePath}/*.gz 2>/dev/null | wc -l)
@@ -38,8 +38,6 @@ process merge_fastq {
 		if [[ "\${count}" != "0" ]]
 		then
 			cat ${SamplePath}/*.fastq.gz > ${SampleName}.fastq.gz
-			
-			nanoq -i ${SampleName}.fastq.gz -s -H > ${SampleName}_readstats.csv
 			nanoq -i ${SampleName}.fastq.gz -q 20 -o ${SampleName}_filtered.fastq.gz
 		
 		else
@@ -47,7 +45,6 @@ process merge_fastq {
 			if [[ "\${count}" != "0" ]]
 			then
 				cat ${SamplePath}/*.fastq| gzip > ${SampleName}.fastq.gz
-				nanoq -i ${SampleName}.fastq.gz -s -H > ${SampleName}_readstats.csv
 				nanoq -i ${SampleName}.fastq.gz -q 20 -o ${SampleName}_filtered.fastq.gz
 			fi
 		fi
@@ -55,18 +52,26 @@ process merge_fastq {
 }
 
 process nanoplot {
-	label "low"
+	label "medium"
 	publishDir "${params.out_dir}/nanoplot",mode:"copy"
 	input:
-	tuple val(SampleName),path(SamplePath)
+	tuple val(SampleName),path(fastq)
+	tuple val(SampleName),path(bam)
 	output:
-	path("${SampleName}_NanoStats.txt"),emit:stats
-	path("${SampleName}_NanoPlot-report.html")
+	path("${SampleName}_NanoStats_unfilt.txt"),emit:stats_ufilt
+	path("${SampleName}_NanoPlot-report_unfilt.html")
+	path("${SampleName}_NanoStats_filtbam.txt"),emit:stats_bam
+	path("${SampleName}_NanoPlot-report_filtbam.html")
 	script:
 	"""
-	NanoPlot --fastq *.fastq.gz -o nanoplot_report
-	mv nanoplot_report/NanoStats.txt ${SampleName}_NanoStats.txt
-	mv nanoplot_report/NanoPlot-report.html ${SampleName}_NanoPlot-report.html
+	NanoPlot --fastq ${fastq} -o ${SampleName}_nanoplot_report
+	mv ${SampleName}_nanoplot_report/NanoStats.txt ${SampleName}_NanoStats_unfilt.txt
+	mv ${SampleName}_nanoplot_report/NanoPlot-report.html ${SampleName}_NanoPlot-report_unfilt.html
+
+
+	NanoPlot --bam ${bam} -o ${SampleName}_nanoplot_bam_report
+	mv ${SampleName}_nanoplot_bam_report/NanoStats.txt ${SampleName}_NanoStats_filtbam.txt
+	mv ${SampleName}_nanoplot_bam_report/NanoPlot-report.html ${SampleName}_NanoPlot-report_filtbam.html
 	"""
 }
 
@@ -116,8 +121,9 @@ process splitbam {
 	tuple val(SampleName),path("${SampleName}_consensus.fasta"),emit:consensus
 	path("${SampleName}_consensus.fasta"),emit:(cons_only)
 	path("${SampleName}_unfilt_stats.txt"),emit:unfilt_stats
-	path("${SampleName}_unfilt_idxstats.csv"),emit:unfilt_idx
+	//path("${SampleName}_unfilt_idxstats.csv"),emit:unfilt_idx
 	path ("${SampleName}_full_length_mappedreads.txt"),emit:full_reads
+	tuple val(SampleName),path("${SampleName}_unfilt.bam"),emit:unfilt_bam
 	script:
 	"""
 	splitbam.sh ${SampleName} ${SamplePath} ${primerbed}
@@ -234,21 +240,21 @@ process make_report {
 	path(mlst)
 	path(cons)
 	output:
-	path("Bovreproseq_results_report.html")
+	path("*.html")
 	script:
 	"""
 	
 	cp ${csv} samples.csv
 	cp ${krona_reports_raw} rawreads.html
 	# handle empty mapped reads files
-	for i in *mappedreads.txt
-	do
-	 	if [ \$(wc -l < "\${i}" ) -eq 0 ]
-		 then
-	 		echo "Amplicon_Name Size Reads" >> \${i}
-			echo "NA NA NA" >> \${i}
-	 	fi
-	done
+	#for i in *mappedreads.txt
+	#do
+	 	#if [ \$(wc -l < "\${i}" ) -eq 0 ]
+		 #then
+	 		#echo "Amplicon_Name Size Reads" >> \${i}
+			#echo "NA NA NA" >> \${i}
+	 	#fi
+	#done
 	# handle empty kraken consensus files
 	#for k in *_cons_kraken.csv
 	#do
@@ -261,7 +267,7 @@ process make_report {
 	cp ${rmdfile} report.Rmd
 	
 
-	Rscript -e 'rmarkdown::render(input="report.Rmd",params=list(csv="samples.csv",krona="rawreads.html"),output_file = "Bovreproseq_results_report.html")'
+	Rscript -e 'rmarkdown::render(input="report.Rmd",params=list(csv="samples.csv",krona="rawreads.html"),output_file="Bovreproseq_results_report.html")'
 	"""
 
 }
@@ -299,7 +305,7 @@ process abricate{
 	path("${SampleName}_abricate.csv")
 	script:
 	"""
-	abricate --datadir ${dbdir} --db Bovreproseq -minid 60  -mincov 60 --quiet ${consensus} 1> ${SampleName}_abricate.csv
+	abricate --datadir ${dbdir} --db Bovreproseq -minid 40  -mincov 40 --quiet ${consensus} 1> ${SampleName}_abricate.csv
 	"""
 	
 }
@@ -338,8 +344,7 @@ workflow {
 	reference=file("${baseDir}/Bovreproseq_reference.fasta")
 	primerbed=file("${baseDir}/Bovreproseq_primer.bed")
 
-	//read statistics
-	nanoplot(merge_fastq.out.unfilt_reads)	
+	
 	//trim barcodes and adapter sequences
 	if (params.trim_barcodes){
 		porechop(merge_fastq.out.reads)
@@ -368,6 +373,8 @@ workflow {
 	// create consensus
 	splitbam(minimap2.out,primerbed)
 
+	//read statistics
+	nanoplot(merge_fastq.out.unfilt_reads,splitbam.out.unfilt_bam)	
 	//medaka polishing
 	if (params.trim_barcodes) {
 		medaka(porechop.out,splitbam.out.consensus,params.medaka_model)
@@ -388,8 +395,8 @@ workflow {
 	// qc report using split bam out put
 	stats=splitbam.out.unfilt_stats
 	idxstats=splitbam.out.idxstats
-	nanoqc=nanoplot.out.stats
-	multiqc(stats.mix(idxstats,nanoqc).collect())
+	nanoqc=nanoplot.out.stats_ufilt	
+	multiqc(nanoqc.mix(stats).collect())
 	
 	// abricate 
 	dbdir=("${baseDir}/Bovreproseq_db")
