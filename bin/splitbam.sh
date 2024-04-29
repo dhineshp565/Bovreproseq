@@ -9,8 +9,8 @@
 # generate stats prior to read filtering
 samtools view -b -h $2|samtools sort > $1_unfilt.bam
 samtools stats "$1_unfilt.bam" > $1_unfilt_stats.txt
-samtools index "$1_unfilt.bam" > $1_unfilt.bai
-samtools idxstats "$1_unfilt.bam" > $1_unfilt_idxstats.csv
+#samtools index "$1_unfilt.bam" > $1_unfilt.bai
+#samtools idxstats "$1_unfilt.bam" > $1_unfilt_idxstats.csv
 #generate a  sorted bam file with primary alignments
 samtools view -b -h -F 0x900 -q 30 $2|samtools sort > $1.bam	
 samtools stats "$1.bam" > $1_stats.txt
@@ -40,7 +40,7 @@ then
 			# generate stats for near full length reads
 			samtools index "$1_${len}_${amp}.bam" > $1_${len}_${amp}.bai
 			samtools idxstats "$1_${len}_${amp}.bam" > $1_${len}_${amp}_idxstats.txt
-			awk '{print $1,$2,$3}' "$1_${len}_${amp}_idxstats.txt" > $1_${amp}_mappedreads.txt
+			awk '{if ($3 >= 0) print $1,$2,$3}' "$1_${len}_${amp}_idxstats.txt" > $1_${amp}_mappedreads.txt
 			#trims primers from both ends of the amplicon using primer bed file
 			samtools ampliconclip --both-ends -b $3 "$1_${len}_${amp}.bam" > $1_trimmed_${len}_${amp}.bam
 			# generate consensus for full length reads
@@ -54,7 +54,7 @@ then
 # handle empty consensus. when there are no mapped reads.add sequence header
 else
 		echo -e ">$1 No consensus" > $1_consensus.fasta
-
+		echo -e "NA NA NA" > "$1_mappedreads.txt"
 fi
 	# insert headers to mappedreads.txt
 sed -i "1i Amplicon_Name Size $1" "$1_mappedreads.txt"
