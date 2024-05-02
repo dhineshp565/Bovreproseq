@@ -310,9 +310,7 @@ process abricate{
 	"""
 	abricate --datadir ${dbdir} --db Bovreproseq -minid 40  -mincov 40 --quiet ${consensus} 1> ${SampleName}_abricate.csv
 	interpret_results.sh ${SampleName}_abricate.csv ${targetlist}
-
-"""
-	
+	"""
 }
 
 process mlst {
