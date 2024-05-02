@@ -236,7 +236,6 @@ process make_report {
 	path(mappedreads)
 	//path(kraken_cons)
 	path(abricate)
-	path(results)
 	path(rmdfile)
 	path(mlst)
 	path(cons)
@@ -311,6 +310,7 @@ process abricate{
 	abricate --datadir ${dbdir} --db Bovreproseq -minid 40  -mincov 40 --quiet ${consensus} 1> ${SampleName}_abricate.csv
 	interpret_results.sh ${SampleName}_abricate.csv ${targetlist}
 	"""
+	
 }
 
 process mlst {
@@ -344,10 +344,9 @@ workflow {
 	data=Channel
 	.fromPath(params.input)
 	merge_fastq(make_csv(data).splitCsv(header:true).map { row-> tuple(row.SampleName,row.SamplePath)})
-
 	reference=file("${baseDir}/Bovreproseq_reference.fasta")
 	primerbed=file("${baseDir}/Bovreproseq_primer.bed")
-	
+
 	
 	//trim barcodes and adapter sequences
 	if (params.trim_barcodes){
@@ -404,7 +403,7 @@ workflow {
 	
 	// abricate 
 	dbdir=("${baseDir}/Bovreproseq_db")
-	targetlist=file("${baseDir}/Bovreproseq_targetlist.txt")
+	targetlist=("${baseDir}/Bovreproseq_targetlist.txt")
 	abricate(medaka.out.consensus,dbdir,targetlist)
 	
 	//tax=("${baseDir}/taxdb")
