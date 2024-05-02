@@ -4,7 +4,7 @@ author: "Bovreproseq primer version #3 - Diagnostic Samples"
 date: "`r Sys.Date()`"
 output: 
   html_document:
-  output_file: "Bovreroseq_report.html"
+  output_file: "Bovreroseq_report_`r Sys.Date()`.html"
 params:
   csv: ""
   krona: ""
@@ -33,13 +33,18 @@ sampleid <- samplelist[,c(1)]
 
 for (i in sampleid){
   cat("####", i, "\n")
-  #use mappedreads.txt and display column 1 and 3
-  mapped_reads <- (paste(i,"_mappedreads.txt",sep=""))
-  df <- read.csv(mapped_reads,header = TRUE,sep=" ")
-  mapped_stat<-df[,c(1,3)]
-  colnames (mapped_stat) <- c("AMPLICON","MAPPED_READS")
-  print(knitr::kable(mapped_stat,align="ll",caption = "NO. OF MAPPED READS. Generated using minimap2 and samtools")) # nolint: line_length_linter.
-  cat('\n\n<!-- -->\n\n') # nolint
+  
+  results <- read.csv(paste(i,"_results.csv",sep=""))
+  results_df <- read.csv(results,header = TRUE,sep = "\t")
+  print (knitr::kable(results_df,align="llll",caption = "RESULTS SUMMARY - Based on abricate results")) 
+  
+  #use mappedreads.txt and display column 1 (amplicon name) and 3 (no. of mapped reads)
+  mapped_reads <- (paste(i,"_mappedreads.txt",sep="")) # filename
+  df <- read.csv(mapped_reads,header = TRUE,sep=" ") # dataframe
+  mapped_stat<-df[,c(1,3)] # sliced dataframe
+  colnames (mapped_stat) <- c("AMPLICON","MAPPED_READS") # column names
+  print(knitr::kable(mapped_stat,align="ll",caption = "NO. OF MAPPED READS. Generated using minimap2 and samtools")) # displat table
+  cat('\n\n<!-- -->\n\n') 
  
   # display abricate results
   abricate_ids <- (paste(i,"_abricate.csv",sep=""))
@@ -47,9 +52,11 @@ for (i in sampleid){
   abricate_final <- abricate_raw[,c(2,6,10,11,12,15)]
   colnames(abricate_final) <- c("SEQUENCE","GENE","%COVERAGE","%IDENTITY","DATABASE","REFERENCE") # nolint
   print(knitr::kable(abricate_final,align = "llcccl",caption = "Consensus compared to reference database. Generated using abricate and custom database")) # nolint: line_length_linter.
+  
   mlst_ids <- (paste(i,"_MLST_results.csv",sep=""))
   mlst_raw <- read.csv(mlst_ids,header = TRUE,sep = "\t")
   mlst_final <- mlst_raw[,c(1,3,11)]
+
   if (grepl("fetus", mlst_final$ORGANISM)) {
   print(knitr::kable(mlst_final,align = "lcl",caption = "MLST tool from github (https://github.com/tseemann/mlst). Scans contig files against traditional PubMLST typing schemes")) # nolint: line_length_linter.
   }
@@ -71,11 +78,7 @@ for (i in sampleid){
   
   cat('\n\n<!-- -->\n\n')
 
-  #blast_ids <- (paste(i,"_report_blast.csv",sep=""))
-  #blast_df <- read.csv(blast_ids,header = TRUE,sep = "\t")
-  #colnames(blast_df) <- c("SEQUENCE","ACCESSION","LENGTH","%COVERAGE","%IDENTITY","Evalue","ORGANISM")
-  #print(knitr::kable(blast_df,align="lcr",caption = "BLAST hits of consensus sequences.Only displays the top hit"))
-  #cat('\n\n<!-- -->\n\n')
+
 }
 ```
 <br>
