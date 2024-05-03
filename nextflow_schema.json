@@ -21,7 +21,8 @@
                     "exists": true,
                     "description": "Path to input directory containing fastq folders",
                     "help_text": "You will need to create a design file with information about the samples in your experiment before running the pipeline. Use this parameter to specify its location. It has to be a comma-separated file with 3 columns, and a header row.",
-                    "fa_icon": "fas fa-folder-open"
+                    "fa_icon": "fas fa-folder-open",
+                    "default": "filepath"
                 },
                 "kraken_db": {
                     "type": "string",
@@ -43,11 +44,21 @@
             "description": "",
             "default": "",
             "properties": {
+                "medaka_model": {
+                    "type": "string",
+                    "default": "r1041_e82_400bps_sup_g615",
+                    "enum": [
+                        "r1041_e82_400bps_sup_g615",
+                        "r941_e81_hac_g514"
+                    ],
+                    "description": "Select basecalling model for polishing"
+                },
                 "trim_barcodes": {
                     "type": "string",
                     "enum": [
                         "Yes"
-                    ]
+                    ],
+                    "description": "Select Yes to trim barcodes"
                 }
             }
         }
