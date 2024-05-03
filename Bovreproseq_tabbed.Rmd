@@ -34,8 +34,8 @@ sampleid <- samplelist[,c(1)]
 for (i in sampleid){
   cat("####", i, "\n")
   
-  results <- read.csv(paste(i,"_results.csv",sep=""))
-  results_df <- read.csv(results,header = TRUE,sep = "\t")
+  results <- (paste(i,"_results.csv",sep=""))
+  results_df <- read.csv(results,header = TRUE,sep = ",")
   print (knitr::kable(results_df,align="llll",caption = "RESULTS SUMMARY - Based on abricate results")) 
   
   #use mappedreads.txt and display column 1 (amplicon name) and 3 (no. of mapped reads)

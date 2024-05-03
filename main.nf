@@ -60,18 +60,18 @@ process nanoplot {
 	output:
 	path("${SampleName}_NanoStats_unfilt.txt"),emit:stats_ufilt
 	path("${SampleName}_NanoPlot-report_unfilt.html")
-	path("${SampleName}_NanoStats_filtbam.txt"),emit:stats_bam
-	path("${SampleName}_NanoPlot-report_filtbam.html")
+	//path("${SampleName}_NanoStats_filtbam.txt"),emit:stats_bam
+	//path("${SampleName}_NanoPlot-report_filtbam.html")
 	script:
 	"""
-	NanoPlot --fastq ${fastq} -o ${SampleName}_nanoplot_report
+	NanoPlot --fastq ${fastq} --percentqual -o ${SampleName}_nanoplot_report
 	mv ${SampleName}_nanoplot_report/NanoStats.txt ${SampleName}_NanoStats_unfilt.txt
 	mv ${SampleName}_nanoplot_report/NanoPlot-report.html ${SampleName}_NanoPlot-report_unfilt.html
 
 
-	NanoPlot --bam ${bam} -o ${SampleName}_nanoplot_bam_report
-	mv ${SampleName}_nanoplot_bam_report/NanoStats.txt ${SampleName}_NanoStats_filtbam.txt
-	mv ${SampleName}_nanoplot_bam_report/NanoPlot-report.html ${SampleName}_NanoPlot-report_filtbam.html
+	# NanoPlot --bam ${bam} -o ${SampleName}_nanoplot_bam_report
+	# mv ${SampleName}_nanoplot_bam_report/NanoStats.txt ${SampleName}_NanoStats_filtbam.txt
+	# mv ${SampleName}_nanoplot_bam_report/NanoPlot-report.html ${SampleName}_NanoPlot-report_filtbam.html
 	"""
 }
 
@@ -236,6 +236,7 @@ process make_report {
 	path(mappedreads)
 	//path(kraken_cons)
 	path(abricate)
+	path(results)
 	path(rmdfile)
 	path(mlst)
 	path(cons)
