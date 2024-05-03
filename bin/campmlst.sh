@@ -1,4 +1,4 @@
-#!/bin/env bash
+#!/usr/bin/env bash
 # This script differentiates Campylobacter fetus subspecies into .fetus or .venerealis based on ST typing (field #3,row #2 in MLST ouput)
 # appends the subspecies resultto the the last column of the results file
 #if no ST type is available NA is added to the last column

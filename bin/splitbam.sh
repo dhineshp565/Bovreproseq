@@ -1,4 +1,4 @@
-#!/bin/env bash
+#!/usr/bin/env bash
 
 # This script takes the sam file from minimap2,
 # filters q30 and primary alignmnets and creates consensus of each amplicon in a sample
@@ -51,10 +51,12 @@ then
 		# merge consensus from all amplicons
 		cat $1_*.fasta > $1_consensus.fasta
 		cat $1_*_mappedreads.txt > $1_full_length_mappedreads.txt
+		
 # handle empty consensus. when there are no mapped reads.add sequence header
 else
 		echo -e ">$1 No consensus" > $1_consensus.fasta
 		echo -e "NA NA NA" > "$1_mappedreads.txt"
+		echo -e "NA NA NA" > "$1_full_length_mappedreads.txt"
 fi
 	# insert headers to mappedreads.txt
 sed -i "1i Amplicon_Name Size $1" "$1_mappedreads.txt"
