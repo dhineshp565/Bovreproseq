@@ -303,12 +303,12 @@ process abricate{
 	path(dbdir)
 	path (targetlist)
 	output:
-	path("${SampleName}_abricate.csv")
-	path("${SampleName}_results.csv")
+	path("${SampleName}_abricate.csv"),emit:abricate
+	path("${SampleName}_results.csv"),emit:results
 	script:
 	"""
 	abricate --datadir ${dbdir} --db Bovreproseq -minid 40  -mincov 40 --quiet ${consensus} 1> ${SampleName}_abricate.csv
-	interpret_results.sh ${SampleName}_abricate.csv ${targetlist}
+	interpret_results.sh ${SampleName} ${targetlist}
 	"""
 	
 }
@@ -413,7 +413,7 @@ workflow {
 	//generate report
 	rmd_file=file("${baseDir}/Bovreproseq_tabbed.Rmd")
 	if (params.kraken_db){
-		make_report(make_csv.out,krona_kraken.out.raw,splitbam.out.mapped.collect(),abricate.out.collect(),rmd_file,mlst.out.collect(),medaka.out.cons_only.collect())
+		make_report(make_csv.out,krona_kraken.out.raw,splitbam.out.mapped.collect(),abricate.out.abricate.collect(),abricate.out.results.collect(),rmd_file,mlst.out.collect(),medaka.out.cons_only.collect())
 	}
 	
 }
