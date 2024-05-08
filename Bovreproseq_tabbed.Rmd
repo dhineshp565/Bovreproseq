@@ -11,9 +11,11 @@ params:
 ---
 
 ```{r setup, include=FALSE}
+
 library(knitr)
 library(base64enc)
 library(htmltools)
+library(kableExtra)
 ```
 
 
@@ -36,14 +38,36 @@ for (i in sampleid){
   
   results <- (paste(i,"_results.csv",sep=""))
   results_df <- read.csv(results,header = TRUE,sep = ",")
-  print (knitr::kable(results_df,align="llll",caption = "RESULTS SUMMARY - Based on abricate results")) 
-  
+  #print (knitr::kable(results_df,align="llll",caption = "RESULTS SUMMARY - Based on abricate results")) 
+  # Create a logical vector indicating where the "Positive" values are
+  # Assuming results_df is your data frame and RESULT is the column containing "Positive"
+  positive_rows <- results_df$RESULT == "Positive"
+
+  # Generate the table with kable
+  table_html <- knitr::kable(results_df, align = "llll", caption = "RESULTS SUMMARY - Based on abricate results") %>%
+    kable_styling()
+
+  # Apply row highlighting
+  if (any(positive_rows)) {
+    table_html <- table_html %>%
+      kable_styling(full_width = TRUE) %>%
+      row_spec(which(positive_rows), background = "lightgreen")
+  }
+
+  # Print the HTML table
+  print(table_html)
+
+  cat('\n\n<!-- -->\n\n')
+  cat('\n\n<!-- -->\n\n')
+
   #use mappedreads.txt and display column 1 (amplicon name) and 3 (no. of mapped reads)
   mapped_reads <- (paste(i,"_mappedreads.txt",sep="")) # filename
   df <- read.csv(mapped_reads,header = TRUE,sep=" ") # dataframe
   mapped_stat<-df[,c(1,3)] # sliced dataframe
   colnames (mapped_stat) <- c("AMPLICON","MAPPED_READS") # column names
-  print(knitr::kable(mapped_stat,align="ll",caption = "NO. OF MAPPED READS. Generated using minimap2 and samtools")) # displat table
+  print(knitr::kable(mapped_stat,align="ll",caption = "NO. OF MAPPED READS. Generated using minimap2 and samtools") %>%
+    kable_styling()) # displat table
+  
   cat('\n\n<!-- -->\n\n') 
  
   # display abricate results
@@ -51,14 +75,18 @@ for (i in sampleid){
   abricate_raw <- read.csv(abricate_ids,header = TRUE,sep = "\t")
   abricate_final <- abricate_raw[,c(2,6,10,11,12,15)]
   colnames(abricate_final) <- c("SEQUENCE","GENE","%COVERAGE","%IDENTITY","DATABASE","REFERENCE") # nolint
-  print(knitr::kable(abricate_final,align = "llcccl",caption = "Consensus compared to reference database. Generated using abricate and custom database")) # nolint: line_length_linter.
+  print(knitr::kable(abricate_final,align = "llcccl",caption = "Consensus compared to reference database. Generated using abricate and custom database") %>%
+    kable_styling()) # nolint: line_length_linter.
   
+   cat('\n\n<!-- -->\n\n')
+
   mlst_ids <- (paste(i,"_MLST_results.csv",sep=""))
   mlst_raw <- read.csv(mlst_ids,header = TRUE,sep = "\t")
   mlst_final <- mlst_raw[,c(1,3,11)]
 
   if (grepl("fetus", mlst_final$ORGANISM)) {
-  print(knitr::kable(mlst_final,align = "lcl",caption = "MLST tool from github (https://github.com/tseemann/mlst). Scans contig files against traditional PubMLST typing schemes")) # nolint: line_length_linter.
+  print(knitr::kable(mlst_final,align = "lcl",caption = "MLST tool from github (https://github.com/tseemann/mlst). Scans contig files against traditional PubMLST typing schemes") %>%
+    kable_styling())
   }
   cat('\n\n<!-- -->\n\n')
 
