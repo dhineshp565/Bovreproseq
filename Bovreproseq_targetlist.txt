@@ -1,6 +1,7 @@
 BVDv-Type-1
 BVDv-Type-2
 Bacillus_licheniformis
+Bovine_herpesvirus_type-1
 BVDv
 Campylobacter_fetus
 Campylobacter_fetus_subsp._venerealis
