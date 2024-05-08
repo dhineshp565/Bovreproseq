@@ -56,22 +56,14 @@ process nanoplot {
 	publishDir "${params.out_dir}/nanoplot",mode:"copy"
 	input:
 	tuple val(SampleName),path(fastq)
-	tuple val(SampleName),path(bam)
 	output:
 	path("${SampleName}_NanoStats_unfilt.txt"),emit:stats_ufilt
 	path("${SampleName}_NanoPlot-report_unfilt.html")
-	//path("${SampleName}_NanoStats_filtbam.txt"),emit:stats_bam
-	//path("${SampleName}_NanoPlot-report_filtbam.html")
 	script:
 	"""
 	NanoPlot --fastq ${fastq} --percentqual -o ${SampleName}_nanoplot_report
 	mv ${SampleName}_nanoplot_report/NanoStats.txt ${SampleName}_NanoStats_unfilt.txt
 	mv ${SampleName}_nanoplot_report/NanoPlot-report.html ${SampleName}_NanoPlot-report_unfilt.html
-
-
-	# NanoPlot --bam ${bam} -o ${SampleName}_nanoplot_bam_report
-	# mv ${SampleName}_nanoplot_bam_report/NanoStats.txt ${SampleName}_NanoStats_filtbam.txt
-	# mv ${SampleName}_nanoplot_bam_report/NanoPlot-report.html ${SampleName}_NanoPlot-report_filtbam.html
 	"""
 }
 
@@ -123,7 +115,7 @@ process splitbam {
 	path("${SampleName}_unfilt_stats.txt"),emit:unfilt_stats
 	//path("${SampleName}_unfilt_idxstats.csv"),emit:unfilt_idx
 	path ("${SampleName}_full_length_mappedreads.txt"),emit:full_reads
-	tuple val(SampleName),path("${SampleName}_unfilt.bam"),emit:unfilt_bam
+	//tuple val(SampleName),path("${SampleName}_unfilt.bam"),emit:unfilt_bam
 	script:
 	"""
 	splitbam.sh ${SampleName} ${SamplePath} ${primerbed}
@@ -213,15 +205,15 @@ process krona_kraken {
 	label "low"
 	input:
 	path(raw)
-	path(consensus)
+	//path(consensus)
 	
 	output:
 	path ("rawreads_classified.html"),emit:raw
-	path("consensus_classified.html"),emit:cons
+	//path("consensus_classified.html"),emit:cons
 	script:
 	"""
 	ktImportTaxonomy -t 5 -m 3 -o rawreads_classified.html ${raw}
-	ktImportTaxonomy -t 5 -m 3 -o consensus_classified.html ${consensus}
+	
 	"""
 }
 
@@ -309,6 +301,7 @@ process abricate{
 	script:
 	"""
 	abricate --datadir ${dbdir} --db Bovreproseq -minid 40  -mincov 40 --quiet ${consensus} 1> ${SampleName}_abricate.csv
+	sed -i "s/_consensus//g" "${SampleName}_abricate.csv"
 	interpret_results.sh ${SampleName} ${targetlist}
 	"""
 	
@@ -378,7 +371,7 @@ workflow {
 	splitbam(minimap2.out,primerbed)
 
 	//read statistics
-	nanoplot(merge_fastq.out.unfilt_reads,splitbam.out.unfilt_bam)	
+	nanoplot(merge_fastq.out.unfilt_reads)	
 	//medaka polishing
 	if (params.trim_barcodes) {
 		medaka(porechop.out,splitbam.out.consensus,params.medaka_model)
@@ -389,10 +382,10 @@ workflow {
 	//condition for kraken2 classification
 	if (params.kraken_db){
 		kraken=params.kraken_db
-		kraken2_consensus(medaka.out.consensus,kraken)
+		//kraken2_consensus(medaka.out.consensus,kraken)
 		kraken_raw=kraken2.out.kraken2_raw
-		kraken_cons=kraken2_consensus.out.kraken2_cons
-		krona_kraken(kraken_raw.collect(),kraken_cons.collect())
+		//kraken_cons=kraken2_consensus.out.kraken2_cons
+		krona_kraken(kraken_raw.collect())
 		
 	}
 	
