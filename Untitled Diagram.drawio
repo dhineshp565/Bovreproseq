@@ -1,4 +1,4 @@
-<mxfile host="app.diagrams.net" modified="2024-05-23T17:57:14.105Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:126.0) Gecko/20100101 Firefox/126.0" etag="3qGL6ZrZ7GoFf6GYGgt7" version="24.4.6" type="github">
+<mxfile host="app.diagrams.net" modified="2024-05-23T17:59:47.626Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:126.0) Gecko/20100101 Firefox/126.0" etag="TIOzqkpIxVzN8nrUx0HI" version="24.4.6" type="github">
   <diagram name="Page-1" id="c7558073-3199-34d8-9f00-42111426c3f3">
     <mxGraphModel dx="2856" dy="887" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" background="none" math="0" shadow="0">
       <root>
@@ -25,7 +25,7 @@
           </mxCell>
         </UserObject>
         <mxCell id="qjGqlxLeWbetl0XT6fP5-253" value="minimap2" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=1;fontFamily=Maven Pro;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DMaven%2BPro;fontColor=#008000;fontSize=18;" vertex="1" parent="1">
-          <mxGeometry x="290" y="55" width="80" height="30" as="geometry" />
+          <mxGeometry x="285" y="55" width="80" height="30" as="geometry" />
         </mxCell>
         <mxCell id="qjGqlxLeWbetl0XT6fP5-254" value="samtools" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=1;fontFamily=Maven Pro;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DMaven%2BPro;fontColor=#008000;fontSize=20;" vertex="1" parent="1">
           <mxGeometry x="450" y="55" width="80" height="30" as="geometry" />
@@ -40,7 +40,7 @@
           <mxGeometry x="650" y="90" width="180" height="30" as="geometry" />
         </mxCell>
         <mxCell id="qjGqlxLeWbetl0XT6fP5-258" value="samtools" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=1;fontFamily=Maven Pro;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DMaven%2BPro;fontColor=#008000;fontSize=20;" vertex="1" parent="1">
-          <mxGeometry x="895" y="60" width="80" height="20" as="geometry" />
+          <mxGeometry x="890" y="60" width="80" height="20" as="geometry" />
         </mxCell>
         <mxCell id="qjGqlxLeWbetl0XT6fP5-259" value="&lt;div style=&quot;font-size: 18px;&quot;&gt;consensus sequence&lt;/div&gt;&lt;div style=&quot;font-size: 18px;&quot;&gt;generation&lt;/div&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=18;fontFamily=Maven Pro;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DMaven%2BPro;" vertex="1" parent="1">
           <mxGeometry x="830" y="90" width="200" height="30" as="geometry" />
@@ -350,7 +350,7 @@
           </mxGeometry>
         </mxCell>
         <mxCell id="qjGqlxLeWbetl0XT6fP5-418" value="medaka" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=1;fontFamily=Maven Pro;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DMaven%2BPro;fontColor=#008000;fontSize=20;" vertex="1" parent="1">
-          <mxGeometry x="1080" y="60" width="80" height="20" as="geometry" />
+          <mxGeometry x="1065" y="60" width="80" height="20" as="geometry" />
         </mxCell>
         <mxCell id="qjGqlxLeWbetl0XT6fP5-419" value="&lt;div style=&quot;font-size: 18px;&quot;&gt;polishing and error correction&lt;br style=&quot;font-size: 20px;&quot;&gt;&lt;/div&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=20;fontFamily=Maven Pro;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DMaven%2BPro;" vertex="1" parent="1">
           <mxGeometry x="1020" y="90" width="200" height="37.5" as="geometry" />
