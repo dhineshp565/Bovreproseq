@@ -1,8 +1,10 @@
 # Bovreproseq
-Targeted multiplex amplicon Sequencing for Bovine Reproductive Pathogens using Oxford Nanopore sequencing platform.
-Requires input directory containing sundirectories with fastq files
-Outputs consensus sequences,kraken,krona and multiqc report if any reads are mapped to reference
-conda or docker needs to be installed
+Targeted multiplex amplicon Sequencing for Bovine Reproductive Pathogens using the Oxford Nanopore sequencing platform.
+For more info please see https://doi.org/10.1101/2024.09.10.612295 
+Requires input directory containing subdirectories with fastq files
+Outputs consensus sequences, Kraken, krona and multiQC report 
+
+
 
 Usage:
 ```
@@ -13,7 +15,7 @@ nextflow run main.nf --input path_to_input --out_dir Results --kraken_db path_to
 Parameters:
 
 --input      Path to input directory
---out_dir     Output directory
+--out_dir    Output directory
 --kraken_db  path to kraken database 
 optional
 --trim_barcodes barcode and adapter trimming using porechop
@@ -21,7 +23,7 @@ optional
 ```
 ## Dependencies
 * nextflow
-* docker
+* docker or conda
 * wsl2
 ## Software Used
 * nanoq (Steinig and Coin (2022). Nanoq: ultra-fast quality control for nanopore reads. Journal of Open Source Software, 7(69), 2991, https://doi.org/10.21105/joss.02991)
