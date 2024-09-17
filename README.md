@@ -1,8 +1,7 @@
 # Bovreproseq
-Targeted multiplex amplicon Sequencing for Bovine Reproductive Pathogens using the Oxford Nanopore sequencing platform.
-For more info please see https://doi.org/10.1101/2024.09.10.612295 
-Requires input directory containing subdirectories with fastq files
-Outputs consensus sequences, Kraken, krona and multiQC report 
+Targeted multiplex amplicon Sequencing for Bovine Reproductive Pathogens using the Oxford Nanopore sequencing platform.\
+For more info please see https://doi.org/10.1101/2024.09.10.612295 \
+Outputs html file with consensus sequences, Kraken, krona and multiQC report \
 
 
 
