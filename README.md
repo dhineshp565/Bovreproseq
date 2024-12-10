@@ -1,5 +1,5 @@
 # Bovreproseq
-Bioinformatic pipeline for targeted syndromic next-generation sequencing panel for simultaneous detection of pathogens associated with bovine reproductive failure\
+Bioinformatics pipeline for targeted syndromic next-generation sequencing panel for simultaneous detection of pathogens associated with bovine reproductive failure\
 For more info please see https://doi.org/10.1128/jcm.01433-24 \
 Outputs html files with results, consensus sequences, Kraken2, krona and multiQC report 
 
