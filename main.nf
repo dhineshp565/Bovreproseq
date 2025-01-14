@@ -300,7 +300,7 @@ process abricate{
 	path("${SampleName}_results.csv"),emit:results
 	script:
 	"""
-	abricate --datadir ${dbdir} --db Bovreproseq -minid 40  -mincov 75 --quiet ${consensus} 1> ${SampleName}_abricate.csv
+	abricate --datadir ${dbdir} --db Bovreproseq -minid 80  -mincov 85 --quiet ${consensus} 1> ${SampleName}_abricate.csv
 	sed -i "s/_consensus//g" "${SampleName}_abricate.csv"
 	interpret_results.sh ${SampleName} ${targetlist}
 	"""
