@@ -44,6 +44,12 @@
             "description": "",
             "default": "",
             "properties": {
+                  "read_count_threshold": {
+                  "type": "integer",
+                  "default": 10,
+                  "help_text": "Read count threshold - Number of reads to classify sample as positive or negative",
+                  "enum": [10, 15, 20, 25]
+                },
                 "trim_barcodes": {
                     "type": "string",
                     "description": "Select Yes to trim barcodes and adpter sequences",
