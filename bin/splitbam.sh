@@ -4,7 +4,7 @@
 # filters q30 and primary alignmnets and creates consensus of each amplicon in a sample
 # also generates read statistics on filtered and unfiltered reads read statistics
 # ouput are used in almost all subsequet process in the workflow
-# $1 = SampleName ,$2 = Input path of sam file from minimap2, $3 = primerbed file with primer coordinates for primer trimming
+# $1 = SampleName ,$2 = Input path of sam file from minimap2, $3 = primerbed file with primer coordinates for primer trimming $4= read_count threshold
 
 # generate stats prior to read filtering
 samtools view -b -h $2|samtools sort > $1_unfilt.bam
@@ -19,7 +19,8 @@ samtools sort "$1.bam" > $1_sorted.bam
 #index sorted bam file and generate read counts for each amplicon
 samtools index "$1_sorted.bam" > $1_sorted.bai
 samtools idxstats "$1_sorted.bam" > $1_idxstats.txt
-awk '{if ($3 >= 10) print $1,$2,$3}' "$1_idxstats.txt" > $1_mappedreads.txt
+threshold=$4
+awk -v var="$threshold" '{if ($3 >= var) print $1, $2, $3}' "${1}_idxstats.txt" > "${1}_mappedreads.txt"
 #conditional for empty mapped reads.txt file
 if [ $(wc -l < "$1_mappedreads.txt") -ne 0 ]
 then 

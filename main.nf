@@ -106,6 +106,7 @@ process splitbam {
 	val(SampleName)
 	path(SamplePath)
 	path (primerbed)
+
 	output:
 	val(SampleName),emit:SampleName
 	path("${SampleName}_mappedreads.txt"),emit:mapped
@@ -118,7 +119,7 @@ process splitbam {
 	//tuple val(SampleName),path("${SampleName}_unfilt.bam"),emit:unfilt_bam
 	script:
 	"""
-	splitbam.sh ${SampleName} ${SamplePath} ${primerbed}
+	splitbam.sh ${SampleName} ${SamplePath} ${primerbed} ${params.read_count_threshold}
 
 	"""
 }
@@ -180,23 +181,6 @@ process kraken2 {
 	kraken2 --db $db_path --output ${SampleName}_kraken.csv --report ${SampleName}_kraken_report.csv --threads 1 ${SamplePath}
 	"""
 }
-process kraken2_consensus {
-	publishDir "${params.out_dir}/kraken2_cons/",mode:"copy"
-	label "high"
-	input:
-	tuple val(SampleName),path (SamplePath)
-	path(db_path)
-	
-	output:
-	path ("${SampleName}_cons_kraken.csv"),emit:(kraken2_cons)
-	path ("${SampleName}_cons_kraken_report.csv")
-
-	script:
-	"""
-	kraken2 --db $db_path --output ${SampleName}_cons_kraken.csv --report ${SampleName}_cons_kraken_report.csv --threads 3 ${SamplePath} --use-names --use-mpa-style
-	"""
-}
-
 
 
 //krona plots
@@ -261,27 +245,6 @@ process make_report {
 	
 
 	Rscript -e 'rmarkdown::render(input="report.Rmd",params=list(csv="samples.csv",krona="rawreads.html"),output_file="Bovreproseq_results_report.html")'
-	"""
-
-}
-// performs remote blast of the consensus sequences
-process blast_cons {
-	publishDir "${params.out_dir}/blast/",mode:"copy"
-	label "high"
-	input:
-	tuple val(SampleName),path(consensus)
-	path (taxdb)
-	output:
-	path("${SampleName}_report_blast.csv")
-	
-	script:
-	"""
-
-	cp ${taxdb}/* ./
-	blastn -db nt -query ${consensus} -out ${SampleName}_blast.csv -outfmt "7 qseqid sseqid length qcovs pident evalue" -max_target_seqs 1 -remote
-	grep -v "#" ${SampleName}_blast.csv|sort|uniq > ${SampleName}_report_blast.csv
-	sed -i '1i queryid\tsubject_id\talignment length\tquery_coverage\t%identity\tevalue\tscinames' ${SampleName}_report_blast.csv
-	
 	"""
 
 }

@@ -1,74 +1,71 @@
 {
-    "$schema": "http://json-schema.org/draft-07/schema",
-    "$id": "https://raw.githubusercontent.com/Bovreproseq/master/nextflow_schema.json",
-    "title": "Bovreproseq pipeline parameters",
-    "description": "Pipeline for generating results from targeted amplicon sequencing of Bovine reproductive pathogens",
-    "type": "object",
-    "definitions": {
-        "input_output_options": {
-            "title": "Input/output options",
-            "type": "object",
-            "fa_icon": "fas fa-terminal",
-            "description": "Define where the pipeline should find input data and save output data.",
-            "required": [
-                "input",
-                "kraken_db"
-            ],
-            "properties": {
-                "input": {
-                    "type": "string",
-                    "format": "directory-path",
-                    "exists": true,
-                    "description": "Path to input directory containing fastq folders",
-                    "help_text": "You will need to create a design file with information about the samples in your experiment before running the pipeline. Use this parameter to specify its location. It has to be a comma-separated file with 3 columns, and a header row.",
-                    "fa_icon": "fas fa-folder-open",
-                    "default": "filepath"
-                },
-                "kraken_db": {
-                    "type": "string",
-                    "fa_icon": "fas fa-database",
-                    "format": "directory-path",
-                    "description": "Path to kraken2 database"
-                },
-                "out_dir": {
-                    "type": "string",
-                    "fa_icon": "far fa-folder-open",
-                    "format": "directory-path",
-                    "description": "Path to output directory"
-                }
-            }
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/Bovreproseq//nextflow_schema.json",
+  "title": "Bovreproseq pipeline parameters",
+  "description": "Pipeline for generating results from targeted amplicon sequencing of Bovine reproductive pathogens",
+  "type": "object",
+  "$defs": {
+    "input_output_options": {
+      "title": "Input/output options",
+      "type": "object",
+      "fa_icon": "fas fa-terminal",
+      "description": "Define where the pipeline should find input data and save output data.",
+      "required": ["input", "out_dir", "kraken_db"],
+      "properties": {
+        "input": {
+          "type": "string",
+          "format": "directory-path",
+          "exists": true,
+          "schema": "assets/schema_input.json",
+          "description": "Path to input directory containing the sub-directories with fastq files\ne.g. fastq_pass/PDS123456/...fastq.gz",
+          "fa_icon": "fas fa-folder-open"
         },
-        "optional": {
-            "title": "Optional",
-            "type": "object",
-            "description": "",
-            "default": "",
-            "properties": {
-                "medaka_model": {
-                    "type": "string",
-                    "default": "r1041_e82_400bps_sup_g615",
-                    "enum": [
-                        "r1041_e82_400bps_sup_g615",
-                        "r941_e81_hac_g514"
-                    ],
-                    "description": "Select basecalling model for polishing"
-                },
-                "trim_barcodes": {
-                    "type": "string",
-                    "enum": [
-                        "Yes"
-                    ],
-                    "description": "Select Yes to trim barcodes"
-                }
-            }
+        "out_dir": {
+          "type": "string",
+          "format": "directory-path",
+          "fa_icon": "fas fa-folder",
+          "description": "Path to output directory"
+        },
+        "kraken_db": {
+          "type": "string",
+          "format": "directory-path",
+          "fa_icon": "fas fa-database",
+          "description": "Path to kraken2 database"
         }
+      }
     },
-    "allOf": [
-        {
-            "$ref": "#/definitions/input_output_options"
+    "optional": {
+      "title": "Optional",
+      "type": "object",
+      "description": "",
+      "default": "",
+      "properties": {
+        "read_count_threshold": {
+          "type": "integer",
+          "default": 10,
+          "help_text": "Read count threshold - Number of reads to classify sample as positive or negative",
+          "enum": [10, 15, 20, 25]
         },
-        {
-            "$ref": "#/definitions/optional"
+        "trim_barcodes": {
+          "type": "string",
+          "help_text": "Select Yes to enable trimming adapter and barcode sequences using porechop",
+          "enum": [
+            "Yes"]
+        },
+        "medaka_model": {
+          "type": "string",
+          "default": "r1041_e82_400bps_sup_g615",
+          "help_text": "Choose medaka model for polishing consensus"
         }
-    ]
+      }
+    }
+  },
+  "allOf": [
+    {
+      "$ref": "#/$defs/input_output_options"
+    },
+    {
+      "$ref": "#/$defs/optional"
+    }
+  ]
 }

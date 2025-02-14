@@ -1,10 +1,10 @@
 ---
 title: "Bovreproseq Results Report"
-author: "Bovreproseq primer version #3 - Diagnostic Samples"
+author: "Generated using [Bovreproseq](https://github.com/dhineshp565/Bovreproseq) pipeline"
 date: "`r Sys.Date()`"
 output: 
   html_document:
-  output_file: "Bovreroseq_report_`r Sys.Date()`.html"
+  output_file: "Bovreposeq_report_`r Sys.Date()`.html"
 params:
   csv: ""
   krona: ""
