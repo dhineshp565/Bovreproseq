@@ -18,7 +18,8 @@
           "exists": true,
           "schema": "assets/schema_input.json",
           "description": "Path to input directory containing the sub-directories with fastq files\ne.g. fastq_pass/PDS123456/...fastq.gz",
-          "fa_icon": "fas fa-folder-open"
+          "fa_icon": "fas fa-folder-open",
+          "default": "filepath"
         },
         "out_dir": {
           "type": "string",
@@ -49,8 +50,7 @@
         "trim_barcodes": {
           "type": "string",
           "help_text": "Select Yes to enable trimming adapter and barcode sequences using porechop",
-          "enum": [
-            "Yes"]
+          "enum": ["Yes"]
         },
         "medaka_model": {
           "type": "string",
