@@ -48,7 +48,7 @@
                   "type": "integer",
                   "default": 10,
                   "help_text": "Read count threshold - Number of reads to classify sample as positive or negative",
-                  "enum": [1,5,10, 15, 20, 25]
+                  "enum": [1,5,10, 15, 20, 25,30]
                 },
                 "trim_barcodes": {
                     "type": "string",
