@@ -244,7 +244,7 @@ process make_report {
 	cp ${rmdfile} report.Rmd
 	
 
-	Rscript -e 'rmarkdown::render(input="report.Rmd",params=list(csv="samples.csv",krona="rawreads.html"),output_file=paste0("Bovreproseq_results_report_", Sys.Date(), "_", format(Sys.time(), "%H-%M-%S"), ".html")))'
+	Rscript -e 'rmarkdown::render(input="report.Rmd",params=list(csv="samples.csv",krona="rawreads.html"),output_file=paste0("Bovreproseq_results_report_", Sys.Date(), "_", format(Sys.time(), "%H-%M-%S"), ".html"))'
 	"""
 
 }
